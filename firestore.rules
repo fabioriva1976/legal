@@ -1,0 +1,145 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funzioni helper per controllare i ruoli
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Funzione helper che verifica il ruolo leggendo direttamente da Firestore
+    // NOTA: Questa funzione fa un get() quindi ha un costo e limiti di utilizzo
+    function hasAnyRole(roles) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/utenti/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/utenti/$(request.auth.uid)).data.ruolo in roles;
+    }
+
+    // Collezione utenti - solo admin e superuser possono modificare
+    match /utenti/{userId} {
+      // Tutti gli utenti autenticati possono leggere qualsiasi documento utente
+      // Questo è necessario per permettere ai controlli di ruolo di funzionare
+      allow get: if isAuthenticated();
+
+      // Solo admin e superuser possono listare tutti gli utenti
+      allow list: if hasAnyRole(['admin', 'superuser']);
+
+      // Solo admin e superuser possono creare/modificare utenti
+      allow create, update: if hasAnyRole(['admin', 'superuser']);
+
+      // Solo superuser può eliminare utenti
+      allow delete: if hasAnyRole(['superuser']);
+    }
+
+    // Collezione documenti centralizzata - accessibile a admin, superuser, user
+    match /documenti/{docId} {
+      allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+    }
+
+    // Collezione azioni centralizzata - accessibile a admin, superuser, user
+    match /azioni/{actionId} {
+      allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+    }
+
+    // Collezione scadenze - accessibile a admin, superuser, user
+    match /scadenze/{scadenzaId} {
+      allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+    }
+
+    // Collezioni entità (entita, entita2, entita3) - accessibile a admin, superuser, user
+    match /entita/{entityId} {
+      allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+
+      // Sottocollezioni documenti e azioni
+      match /documenti/{docId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+      match /azioni/{actionId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+    }
+
+    match /entita2/{entityId} {
+      allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+
+      match /documenti/{docId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+      match /azioni/{actionId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+    }
+
+    match /entita3/{entityId} {
+      // TEMPORANEO: Permetti a tutti gli utenti autenticati per debug
+      allow get, list, create, update, delete: if isAuthenticated();
+
+      match /documenti/{docId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+      match /azioni/{actionId} {
+        allow read, write: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+    }
+
+    // Collezione settings - solo admin e superuser possono modificare
+    match /settings/{settingId} {
+      allow read: if hasAnyRole(['admin', 'superuser', 'user', 'guest']);
+      allow write: if hasAnyRole(['admin', 'superuser']);
+    }
+
+    // Collezione configurazioni - solo admin e superuser possono modificare
+    // TEMPORANEO: Permetti a tutti gli utenti autenticati per debug
+    match /configurazioni/{configId} {
+      allow read, write: if isAuthenticated();
+      // allow read: if hasAnyRole(['admin', 'superuser']);
+      // allow write: if hasAnyRole(['admin', 'superuser']);
+    }
+
+    // Collezione calendar_tokens - gli utenti possono leggere/scrivere solo il proprio token
+    match /calendar_tokens/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Collezione notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow write: if hasAnyRole(['admin', 'superuser']);
+    }
+
+    // Collezione audit_logs
+    match /audit_logs/{logId} {
+      allow read: if hasAnyRole(['admin', 'superuser', 'user']);
+      allow write: if false;
+    }
+
+    // Collezioni anagrafica - accessibile a admin, superuser, user
+    match /anagrafica_agenti/{entityId} {
+      allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+
+      match /documenti/{docId} {
+        allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+      match /azioni/{actionId} {
+        allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+    }
+
+    match /anagrafica_clienti/{entityId} {
+      allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+
+      match /documenti/{docId} {
+        allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+      match /azioni/{actionId} {
+        allow get, list, create, update, delete: if hasAnyRole(['admin', 'superuser', 'user']);
+      }
+    }
+
+    // TEMPORANEO: Permetti tutto per debug
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

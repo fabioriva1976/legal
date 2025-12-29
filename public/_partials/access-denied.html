@@ -1,0 +1,77 @@
+<div class="container">
+    <div class="access-denied-container">
+        <div class="access-denied-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+        </div>
+        <h1 class="access-denied-title">Accesso Negato</h1>
+        <p class="access-denied-message">
+            Non hai i permessi necessari per accedere a questa pagina.
+        </p>
+        <p class="access-denied-submessage">
+            Se ritieni che questo sia un errore, contatta l'amministratore del sistema.
+        </p>
+        <div class="access-denied-actions">
+            <a href="/page-dashboard.html" class="btn btn-primary">Torna alla Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.access-denied-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+}
+
+.access-denied-icon {
+    color: #ef4444;
+    margin-bottom: 2rem;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.access-denied-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.access-denied-message {
+    font-size: 1.25rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.5rem;
+    max-width: 500px;
+}
+
+.access-denied-submessage {
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 2rem;
+    max-width: 500px;
+}
+
+.access-denied-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.access-denied-actions .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+}
+</style>

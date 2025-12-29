@@ -1,0 +1,86 @@
+<div class="container">
+    <div class="header">
+        <h1>Documenti Legali</h1>
+        <button class="btn" id="new-entity-btn">Nuovo Documento</button>
+    </div>
+    <table id="data-table"></table>
+</div>
+
+<div id="entity-form-sidebar" class="form-sidebar">
+    <div class="sidebar-header">
+        <h2 id="entity-form-title">Nuovo Documento</h2>
+        <button id="close-sidebar-btn" class="close-btn">&times;</button>
+    </div>
+    <div id="entity-form-container">
+        <form id="entity-form">
+            <input type="hidden" id="entity-id">
+            <div class="form-scroll-area">
+                <div class="form-group">
+                    <label for="titolo">Titolo Documento *</label>
+                    <input type="text" id="titolo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descrizione">Descrizione</label>
+                    <textarea id="descrizione" rows="4" placeholder="Descrizione del documento"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipologia">Tipologia *</label>
+                    <select id="tipologia" required>
+                        <option value="">Seleziona tipologia</option>
+                        <option value="atto">Atto</option>
+                        <option value="contratto">Contratto</option>
+                        <option value="sentenza">Sentenza</option>
+                        <option value="ordinanza">Ordinanza</option>
+                        <option value="decreto">Decreto</option>
+                        <option value="legge">Legge</option>
+                        <option value="regolamento">Regolamento</option>
+                        <option value="licenziamento">Licenziamento</option>
+                        <option value="citazione">Citazione</option>
+                        <option value="ricorso">Ricorso</option>
+                        <option value="parere_legale">Parere Legale</option>
+                        <option value="procura">Procura</option>
+                        <option value="verbale">Verbale</option>
+                        <option value="altro">Altro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tag</label>
+                    <input type="text" id="tags" placeholder="Es: civile, penale, lavoro (separati da virgola)">
+                    <small style="color: var(--text-color-secondary);">Inserisci i tag separati da virgola</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Carica File *</label>
+                    <div class="file-drop-area" id="file-drop-area">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p class="file-message">Trascina il file qui o <strong>clicca</strong></p>
+                        <input type="file" id="document-upload" accept=".pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div id="file-preview"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Attivo</label>
+                    <div class="toggle-group">
+                        <label for="toggle-stato" class="toggle-label">
+                            <input type="checkbox" id="toggle-stato" class="hidden-toggle" checked>
+                            <span class="toggle-switch"></span>Attivo
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="form-footer">
+            <button type="submit" form="entity-form" class="btn">Salva</button>
+            <span id="save-message" class="save-message"></span>
+        </div>
+    </div>
+</div>

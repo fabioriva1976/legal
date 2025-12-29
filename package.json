@@ -1,0 +1,13 @@
+{
+  "name": "gestionale-webapp",
+  "version": "1.0.0",
+  "description": "Gestionale con file statici",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s ."
+  },
+  "dependencies": {
+    "firebase-functions": "^7.0.2",
+    "serve": "^14.0.1"
+  }
+}

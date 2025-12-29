@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="header">
+        <h1>Il Mio Profilo</h1>
+    </div>
+
+    <div id="profile-form-container" class="profile-container">
+        <form id="profile-form">
+            <input type="hidden" id="profile-user-id">
+            <div class="form-scroll-area">
+                <div class="form-group">
+                    <label for="profile-nome">Nome</label>
+                    <input type="text" id="profile-nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-cognome">Cognome</label>
+                    <input type="text" id="profile-cognome">
+                </div>
+                <div class="form-group">
+                    <label for="profile-email">Email</label>
+                    <input type="email" id="profile-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-telefono">Telefono</label>
+                    <input type="text" id="profile-telefono">
+                </div>
+                <div class="form-group">
+                    <label for="profile-password">Nuova Password</label>
+                    <input type="password" id="profile-password" placeholder="Lascia vuoto per non modificare">
+                </div>
+            </div>
+            <div class="form-footer-inline">
+                <button type="submit" class="btn">Salva Modifiche</button>
+                <span id="profile-save-message" class="save-message"></span>
+            </div>
+        </form>
+    </div>
+</div>

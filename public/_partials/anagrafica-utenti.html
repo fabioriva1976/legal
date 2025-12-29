@@ -1,0 +1,95 @@
+<div class="container">
+    <div class="header">
+        <h1>Utenti</h1>
+        <button class="btn" id="new-entity-btn">Nuovo Utente</button>
+    </div>
+    <table id="data-table"></table>
+</div>
+
+<div id="entity-form-sidebar" class="form-sidebar">
+    <div class="sidebar-header">
+        <h2 id="entity-form-title">Nuovo Utente</h2>
+        <button id="close-sidebar-btn" class="close-btn">&times;</button>
+    </div>
+    <div id="entity-form-container">
+        <form id="entity-form">
+            <div class="tab-nav">
+                <button type="button" class="tab-link active" data-tab="anagrafica">Anagrafica</button>
+                <button type="button" class="tab-link" data-tab="documenti">Documenti</button>
+                <button type="button" class="tab-link" data-tab="azioni">Azioni</button>
+            </div>
+            <input type="hidden" id="entity-id">
+            <div class="form-scroll-area">
+                <div id="tab-anagrafica" class="tab-content active">
+                    <div class="form-group">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cognome">Cognome</label>
+                        <input type="text" id="cognome">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group" id="password-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Lascia vuoto per password auto-generata">
+                        <small style="color: #666; font-size: 0.85em;">Minimo 6 caratteri. Se lasci vuoto verrà generata automaticamente.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Telefono</label>
+                        <input type="text" id="telefono">
+                    </div>
+                    <div class="form-group">
+                        <label for="ruolo-multiselect">Ruolo</label>
+                        <div id="ruolo-multiselect" class="multiselect-container">
+                            <div class="multiselect-input-wrapper">
+                                <div class="multiselect-selected-list"></div>
+                                <svg class="multiselect-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <div class="multiselect-dropdown"></div>
+                        </div>
+                        <select id="ruolo-multiselect-hidden" hidden required>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div class="toggle-group">
+                            <label for="toggle-status" class="toggle-label">
+                                <input type="checkbox" id="toggle-status" class="hidden-toggle" checked>
+                                <span class="toggle-switch"></span>Attivo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-documenti" class="tab-content">
+                    <div class="form-group">
+                        <label>Aggiungi documenti</label>
+                        <div class="file-drop-area" id="file-drop-area">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p class="file-message">Trascina i file qui o <strong>clicca</strong></p>
+                            <input type="file" id="document-upload" multiple>
+                        </div>
+                    </div>
+                    <div id="document-preview-list"></div>
+                </div>
+                <div id="tab-azioni" class="tab-content">
+                    <div class="action-list-container">
+                        <h5 class="action-list-title">Storico Azioni</h5>
+                        <div id="action-list"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="form-footer">
+            <button type="submit" form="entity-form" class="btn">Salva</button>
+            <span id="save-message" class="save-message"></span>
+        </div>
+    </div>
+</div>

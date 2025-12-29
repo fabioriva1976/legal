@@ -1,0 +1,312 @@
+<div class="container parser-container">
+    <section>
+        <div class="header">
+            <h1>Configurazione Agent AI</h1>
+        </div>
+        <p style="margin-bottom: 1.5rem; color: var(--text-color-secondary);">Configura l'intelligenza artificiale e i modelli generativi per il tuo assistente virtuale</p>
+    </section>
+
+    <div class="config-card">
+        <div class="config-section">
+            <h2>Provider e Modello</h2>
+            <p class="description">Seleziona il provider AI e il modello da utilizzare per le interazioni con l'assistente.</p>
+
+            <form id="ai-config-form">
+                <div class="form-group">
+                    <label for="ai-provider">Provider AI *</label>
+                    <select id="ai-provider" name="provider" class="form-control" required>
+                        <option value="google">Google AI (Gemini)</option>
+                        <option value="openai">OpenAI (GPT)</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="azure">Azure OpenAI</option>
+                    </select>
+                    <small class="help-text">Seleziona il fornitore del servizio AI</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="ai-api-key">API Key *</label>
+                    <input type="password" id="ai-api-key" name="apiKey" class="form-control" placeholder="sk-xxxxx o AIzaSyxxxxx" required>
+                    <small class="help-text">Chiave API del provider selezionato</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ai-model">Modello *</label>
+                        <select id="ai-model" name="model" class="form-control" required>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="claude-3-opus">Claude 3 Opus</option>
+                            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                        </select>
+                        <small class="help-text">Modello AI da utilizzare</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-temperature">Temperature</label>
+                        <input type="number" id="ai-temperature" name="temperature" class="form-control" min="0" max="2" step="0.1" value="0.7">
+                        <small class="help-text">Creatività delle risposte (0-2)</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ai-max-tokens">Max Tokens</label>
+                        <input type="number" id="ai-max-tokens" name="maxTokens" class="form-control" placeholder="2048" value="2048">
+                        <small class="help-text">Lunghezza massima risposta</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-timeout">Timeout (secondi)</label>
+                        <input type="number" id="ai-timeout" name="timeout" class="form-control" placeholder="30" value="30">
+                        <small class="help-text">Timeout per richieste API</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ai-system-prompt">System Prompt</label>
+                    <textarea id="ai-system-prompt" name="systemPrompt" class="form-control" rows="4" placeholder="Sei un assistente virtuale...">Sei un assistente virtuale intelligente che aiuta gli utenti con le loro richieste in modo professionale e cortese.</textarea>
+                    <small class="help-text">Istruzioni di sistema per l'AI</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="ai-enable-context" name="enableContext" checked>
+                        <span>Mantieni contesto conversazione</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="ai-enable-safety" name="enableSafety" checked>
+                        <span>Abilita filtri di sicurezza</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Salva Configurazione</span>
+                    </button>
+                    <button type="button" id="test-ai-btn" class="btn btn-secondary">
+                        Test AI
+                    </button>
+                </div>
+
+                <div id="form-message" class="form-message" style="display: none;"></div>
+            </form>
+        </div>
+
+        <div class="config-section status-section">
+            <h2>Stato Configurazione</h2>
+            <div id="status-container">
+                <div class="status-item">
+                    <span class="status-label">Provider:</span>
+                    <span id="status-provider" class="status-value">Non configurato</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Modello:</span>
+                    <span id="status-model" class="status-value">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Temperature:</span>
+                    <span id="status-temperature" class="status-value">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Max Tokens:</span>
+                    <span id="status-maxTokens" class="status-value">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Ultima modifica:</span>
+                    <span id="status-updatedAt" class="status-value">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .config-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .config-section {
+        padding: 2rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .config-section:last-child {
+        border-bottom: none;
+    }
+
+    .config-section h2 {
+        margin: 0 0 1rem;
+        font-size: 1.25rem;
+        color: #1f2937;
+    }
+
+    .description {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .help-text {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #374151;
+        user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .form-message {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-message.success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .form-message.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .status-section {
+        background: #f9fafb;
+    }
+
+    #status-container {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+    }
+
+    .status-label {
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .status-value {
+        color: #6b7280;
+    }
+
+    .status-value.configured {
+        color: #059669;
+    }
+
+    .status-value.not-configured {
+        color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div id="sidebar-placeholder">
+            <div class="loader-container"><div class="loader"></div></div>ù
+        </div>
+
+        <div class="content-wrapper">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle-btn" id="toggle-sidebar-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H20M4 12H12M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobile-menu-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+
+                <div class="header-right">
+                    <button class="theme-toggle-btn" id="theme-toggle">
+                        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+
+                    <button class="user-profile-btn" id="profile-toggle">
+                        <img id="avatar-icon" src="https://ui-avatars.com/api/?name=Anonimous&background=3b82f6&color=fff&rounded=true" alt="User Avatar">
+                    </button>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div id="content-placeholder">
+                    <div class="loader-container"><div class="loader"></div></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- INSERITO: ApexCharts.js per le tabelle -->
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+    
+    <!-- INSERITO: sortable per kanban -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!-- INSERITO: ApexCharts.js per i grafici -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- INSERITO: Quill.js per editor WYSIWYG -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script type="module" src="js/main.js"></script> 
+
+</body>
+</html>

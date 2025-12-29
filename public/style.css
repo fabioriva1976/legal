@@ -1,0 +1,1590 @@
+/* ========================================================================
+   FILE CSS DEFINITIVO E STABILE
+   ======================================================================== */
+
+/* --- 1. VARIABILI E RESET GLOBALE --- */
+:root {
+    --primary-color: #3b82f6; --primary-hover: #2563eb; --danger-color: #ef4444; --danger-hover: #dc2626; --success-color: #10b981;
+    --body-bg: #f1f5f9; --container-bg: #fff; --text-color-primary: #1e2b3b; --text-color-secondary: #64748b; --border-color: #e2e8f0;
+    --sidebar-bg: #1e2b3b; --sidebar-text: #cbd5e1; --sidebar-active-bg: var(--primary-color); --sidebar-hover-bg: #334155;
+    --sidebar-width: 260px; --sidebar-width-collapsed: 80px; --header-height: 70px; --border-radius: 10px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow: 0 3px 8px -1px rgb(27 38 61 / 0.09), 0 2px 4px -2px rgb(27 38 61 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+    --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s var(--transition-easing);
+    --transition-normal: all 0.2s var(--transition-easing);
+    --metric-bg: #fff; --metric-border-color: #e5e7eb; --metric-value-color: #1f2937; --metric-label-color: #374151; --metric-context-color: #6b7280;
+    --badge-success-bg: #ecfdf5; --badge-success-text: #067647; --badge-error-bg: #fff1f2; --badge-error-text: #e11d48;
+}
+.dark-mode {
+    --body-bg: #1a222c; --container-bg: #24303f; --text-color-primary: #dee4ee; --text-color-secondary: #9da9bb; --border-color: #3d4d60;
+    --sidebar-bg: #24303f; --sidebar-hover-bg: #3d4d60;
+    --metric-bg: #1f2937; --metric-border-color: #374151; --metric-value-color: #fff; --metric-label-color: #9ca3af; --metric-context-color: #9ca3af;
+    --badge-success-bg: rgba(16, 185, 129, 0.15); --badge-success-text: #34d399; --badge-error-bg: rgba(239, 68, 68, 0.15); --badge-error-text: #f87171;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Inter', sans-serif; background-color: var(--body-bg); color: var(--text-color-primary); transition: var(--transition-normal); -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* --- 2. LAYOUT PRINCIPALE --- */
+.app-wrapper { display: grid; grid-template-columns: var(--sidebar-width) 1fr; height: 100vh; transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.content-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.main-content { flex-grow: 1; padding: 1.5rem; overflow-y: auto; }
+.app-wrapper.sidebar-collapsed { grid-template-columns: var(--sidebar-width-collapsed) 1fr; }
+
+/* --- 3. HEADER SUPERIORE --- */
+.main-header { display: flex; align-items: center; justify-content: space-between; height: var(--header-height); padding: 0 1.5rem; background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: sticky; top: 0; z-index: 500; transition: var(--transition-normal); }
+.dark-mode .main-header { background-color: rgba(36, 48, 63, 0.8); }
+.header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+.sidebar-toggle-btn, .mobile-menu-toggle { color: var(--text-color-secondary); }
+.mobile-menu-toggle { display: none; }
+.theme-toggle-btn { position: relative; width: 24px; height: 24px; }
+.theme-toggle-btn .icon-sun { display: block; } .dark-mode .theme-toggle-btn .icon-sun { display: none; }
+.theme-toggle-btn .icon-moon { display: none; } .dark-mode .theme-toggle-btn .icon-moon { display: block; }
+.admin-toggle-btn { background: none; border: none; padding: 0.5rem; cursor: pointer; transition: var(--transition-fast); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-color-secondary); }
+.admin-toggle-btn:hover { background-color: rgba(59, 130, 246, 0.1); color: var(--primary-color); }
+.user-profile-btn { background: none; border: none; padding: 0; cursor: pointer; transition: var(--transition-fast); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.user-profile-btn:hover { transform: scale(1.05); opacity: 0.8; }
+.user-profile-btn img { width: 50px; height: 50px; border-radius: 50%; display: block; object-fit: cover; }
+
+/* --- 4. SIDEBAR DI NAVIGAZIONE --- */
+.sidebar { background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; transition: var(--transition-normal); overflow-y: auto; overflow-x: hidden; }
+.sidebar-header { display: flex; align-items: center; justify-content: center; height: var(--header-height); flex-shrink: 0; }
+.logo { font-size: 1.5rem; font-weight: 700; color: #fff; white-space: nowrap; }
+.nav-menu { list-style: none; padding: 1rem 0.75rem; }
+.nav-bottom { margin-top: auto; }
+.nav-menu a { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: var(--border-radius); margin-bottom: 0.25rem; transition: var(--transition-fast), transform 0.15s var(--transition-easing); white-space: nowrap; transform: translateZ(0); }
+.nav-menu a:hover { background-color: var(--sidebar-hover-bg); color: #fff; transform: translateX(4px); }
+.app-wrapper.sidebar-collapsed .nav-menu a:hover { transform: scale(1.1); }
+.nav-menu li.active > a { background-color: var(--sidebar-active-bg); color: #fff; font-weight: 500; }
+.nav-icon { width: 20px; height: 20px; margin-right: 1rem; flex-shrink: 0; }
+.app-wrapper.sidebar-collapsed .logo, .app-wrapper.sidebar-collapsed .nav-menu span { opacity: 0; visibility: hidden; width: 0; }
+.app-wrapper.sidebar-collapsed .nav-menu a { justify-content: center; }
+.app-wrapper.sidebar-collapsed .nav-icon { margin: 0; }
+
+/* --- 5. CONTENUTO DELLA PAGINA (TABELLE, FORM, etc.) --- */
+.container { background-color: var(--container-bg); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); transition: var(--transition-normal); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.header h1 { font-size: 1.5rem; font-weight: 600; }
+.btn { background-color: var(--primary-color); color: #fff; padding: 0.6rem 1.2rem; border-radius: var(--border-radius); font-weight: 600; transition: var(--transition-normal), transform 0.1s ease-out; display: inline-flex; align-items: center; gap: 0.5rem; }
+.btn:hover { background-color: var(--primary-hover); transform: scale(1.02); box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.3); }
+.btn:active { transform: scale(0.98); box-shadow: none; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn:disabled:hover { background-color: var(--primary-color); transform: none; box-shadow: none; }
+.btn-loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+thead { background-color: var(--body-bg); }
+th { font-weight: 600; font-size: 0.875rem; color: var(--text-color-secondary); text-transform: uppercase; }
+tbody tr:hover { background-color: var(--body-bg); }
+td .btn-edit { border: 1px solid var(--border-color); color: var(--text-color-primary); padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.5rem; transition: var(--transition-fast); }
+td .btn-edit:hover { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+td .btn-delete { color: var(--danger-color); padding: 0.25rem 0.5rem; border-radius: 4px; }
+td .btn-delete:hover { background-color: var(--danger-color); color: white; }
+
+/* --- 6. PANNELLO FORM SCORREVOLE --- */
+.form-sidebar { position: fixed; top: 0; right: 0; width: 100%; max-width: 600px; height: 100%; background-color: var(--container-bg); box-shadow: -10px 0 30px -15px rgba(0, 0, 0, 0.15); transform: translateX(100%); transition: transform 0.4s var(--transition-easing); z-index: 1000; display: flex; flex-direction: column; }
+.form-sidebar.open { transform: translateX(0); }
+.form-sidebar .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.form-sidebar .sidebar-header h2 { font-size: 1.25rem; }
+.close-btn { font-size: 2rem; color: var(--text-color-secondary); }
+#entity-form-container, #ref-entity-form-container, #entity2-form-container, #entity3-form-container { position: relative; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+#entity-form, #ref-entity-form, #entity2-form, #entity3-form { flex-grow: 1; overflow-y: auto; padding: 1.5rem; }
+.form-scroll-area { /* Contenitore interno per lo scroll */ }
+.form-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); background-color: var(--container-bg); flex-shrink: 0; display: flex; align-items: center; gap: 1rem; }
+.form-footer-inline { padding: 1.5rem 0; display: flex; align-items: center; gap: 1rem; }
+.save-message { display: none; color: var(--success-color); font-size: 0.875rem; font-weight: 500; }
+.profile-container { max-width: 800px; }
+.tab-nav { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+.tab-link { padding: 0.75rem 1rem; border-bottom: 2px solid transparent; color: var(--text-color-secondary); }
+.tab-link.active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 500; }
+.tab-content { display: none; } .tab-content.active { display: block; }
+.form-group { margin-bottom: 1.25rem; }
+label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+input[type="text"], input[type="email"], input[type="number"], input[type="password"], input[type="date"], select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--body-bg); color: var(--text-color-primary); min-height: 46px; font-size: 1rem; }
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, select:focus, textarea:focus { border-color: var(--primary-color); background-color: var(--container-bg); box-shadow: var(--shadow-focus); outline: none; }
+.condition-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.condition-row > div { flex-grow: 1; }
+.remove-condition-btn { flex-shrink: 0; height: 40px; width: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; line-height: 1; }
+
+/* --- 7. COMPONENTE FILE UPLOAD --- */
+.file-drop-area { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background-color: var(--body-bg); color: var(--text-color-secondary); cursor: pointer; transition: var(--transition-normal); }
+.file-drop-area:hover, .file-drop-area.drag-over { border-color: var(--primary-color); background-color: var(--container-bg); }
+.file-drop-area .upload-icon { margin-bottom: 0.5rem; }
+.file-drop-area .file-message { font-size: 1rem; text-align: center; }
+.file-drop-area input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+#document-preview-list { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+/* NOTA: .file-preview-item è definito più avanti nella sezione documenti */
+.file-preview-item .file-icon { width: 24px; height: 24px; margin-right: 0.75rem; flex-shrink: 0; color: var(--text-color-secondary); }
+.file-preview-item .file-details { flex-grow: 1; overflow: hidden; }
+.file-preview-item .file-name { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-preview-item .file-size { font-size: 0.875rem; color: var(--text-color-secondary); }
+.file-preview-item .remove-file-btn { margin-left: 1rem; color: var(--danger-color); font-size: 1.25rem; line-height: 1; }
+.file-name-link { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.file-name-link:hover { text-decoration: underline; }
+.existing-file .file-details { font-style: italic; }
+
+/* --- 8. RESPONSIVITÀ --- */
+@media (max-width: 768px) {
+    .app-wrapper { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 2000; width: var(--sidebar-width); }
+    .app-wrapper.sidebar-mobile-open .sidebar { transform: translateX(0); box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
+    .sidebar-toggle-btn { display: none; }
+    .mobile-menu-toggle { display: block; }
+    table thead { display: none; }
+    table tr { display: block; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1rem; }
+    table td { display: flex; justify-content: space-between; align-items: center; border-bottom: none; padding: 0.5rem 0; }
+    table td:not(:last-child) { border-bottom: 1px dashed var(--border-color); }
+    table td::before { content: attr(data-label); font-weight: 600; margin-right: 1rem; }
+}
+
+/* --- 9. COMPONENTE MULTI-SELECT --- */
+.multiselect-container { position: relative; }
+.multiselect-input-wrapper { display: flex; align-items: center; width: 100%; padding: 0.3rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--body-bg); cursor: pointer; min-height: 46px; }
+.multiselect-selected-list { display: flex; flex-wrap: wrap; gap: 0.5rem; flex-grow: 1; }
+.multiselect-tag { display: flex; align-items: center; background-color: var(--primary-color); color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; }
+.multiselect-tag-remove { margin-left: 0.5rem; width: 16px; height: 16px; background-color: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; cursor: pointer; }
+.multiselect-chevron { width: 20px; height: 20px; color: var(--text-color-secondary); transition: var(--transition-normal); margin-left: 0.5rem; }
+.multiselect-container.open .multiselect-chevron { transform: rotate(180deg); }
+.multiselect-dropdown { position: absolute; top: calc(100% + 8px); left: 0; width: 100%; background-color: var(--container-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); box-shadow: var(--shadow); z-index: 1010; max-height: 200px; overflow-y: auto; display: none; }
+.multiselect-container.open .multiselect-dropdown { display: block; }
+.multiselect-option { padding: 0.75rem 1rem; cursor: pointer; transition: var(--transition-fast); }
+.multiselect-option:hover { background-color: var(--body-bg); }
+.multiselect-option.hidden { display: none; }
+
+/* --- 10. COMPONENTI FORM AGGIUNTIVI --- */
+.form-message { padding: 0.75rem 1rem; border-radius: var(--border-radius); margin-bottom: 1.5rem; font-weight: 500; display: none; }
+.form-message.success { background-color: #dcfce7; color: #166534; border: 1px solid #10b981; }
+.form-message.error { background-color: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+
+/* --- 11. COMPONENTI INTERATTIVI --- */
+.btn { position: relative; transition: background-color 0.2s, color 0.2s; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn .btn-text { transition: opacity 0.2s; }
+.btn.loading .btn-text { opacity: 0; }
+.btn .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid rgba(255, 255, 255, 0.5); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; opacity: 0; transition: opacity 0.2s; }
+.btn.loading .loader { opacity: 1; }
+@keyframes spin {
+    /* Dal frame 0% (implicito) */
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    /* Al frame 100% */
+    to {
+        /* * MANTIENI la stessa traslazione
+         * e cambia SOLO la rotazione.
+         */
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* --- 12. DATATABLES CUSTOM STYLING (aggiornato per simple-datatables) --- */
+.data-table-container {
+    background-color: var(--container-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+.datatable-search input {
+    background-color: var(--body-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.6rem 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color-primary);
+}
+.datatable-info, .datatable-pagination a {
+    color: var(--text-color-secondary);
+}
+.datatable-pagination a {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.5em 0.75em;
+    margin: 0 2px;
+}
+.datatable-pagination a:hover {
+    background: var(--body-bg);
+    border-color: var(--primary-color);
+}
+.datatable-pagination .active a, .datatable-pagination .active a:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+.datatable-table th, .datatable-table td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem !important;
+}
+.datatable-table thead th {
+    color: var(--text-color-secondary);
+}
+
+/* --- 13. CSS DASHBOARD --- */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+@media (min-width: 640px) {
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1280px) {
+  .metric-grid { grid-template-columns: repeat(6, 1fr); }
+}
+.metric-item { background-color: var(--metric-bg); padding: 1.5rem; border-radius: 1rem; transition: var(--transition-normal); }
+.metric-item__value { font-size: 1.875rem; font-weight: 700; color: var(--metric-value-color); margin: 0; transition: var(--transition-normal); }
+.metric-item__footer { margin-top: 1.25rem; display: flex; align-items: flex-end; justify-content: space-between; }
+.metric-item__label { font-size: 0.875rem; color: var(--metric-label-color); margin: 0; transition: var(--transition-normal); }
+.metric-item__details { display: flex; align-items: center; gap: 0.25rem; }
+.metric-item__badge { display: flex; align-items: center; gap: 0.25rem; border-radius: 9999px; padding: 2px 8px; font-size: 0.75rem; font-weight: 500; transition: var(--transition-normal); }
+.metric-item__badge--success { background-color: var(--badge-success-bg); color: var(--badge-success-text); }
+.metric-item__badge--error { background-color: var(--badge-error-bg); color: var(--badge-error-text); }
+.metric-item__context { font-size: 0.75rem; color: var(--metric-context-color); transition: var(--transition-normal); }
+.metric-item--span-2 { grid-column: span 2; }
+.metric-item--span-3 { grid-column: span 3; }
+.metric-item--span-6 { grid-column: span 6; }
+
+
+/* --- 14. LOADER --- */
+#sidebar-placeholder .loader-container { background-color: #1a222c; }
+#content-placeholder .loader-container { background-color: #f1f5f9; }
+.loader-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3b82f6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: spin 1s linear infinite; }
+
+
+/* --- 15. FORM INPUTS CUSTOM --- */
+.input-with-icon { position: relative; }
+.input-with-icon .input-icon { position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary); }
+.input-with-icon input { padding-left: 2.75rem; }
+
+.checkbox-radio-group { display: flex; flex-direction: column; gap: 0.75rem; }
+.checkbox-radio-label { display: flex; align-items: center; cursor: pointer; user-select: none; }
+.hidden-checkbox-radio { position: absolute; opacity: 0; width: 0; height: 0; }
+.custom-checkbox { width: 20px; height: 20px; border: 2px solid var(--border-color); border-radius: 4px; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-normal); position: relative; }
+.custom-checkbox::after { content: ''; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); opacity: 0; transition: opacity 0.2s; }
+.hidden-checkbox-radio:checked + .custom-checkbox { background-color: var(--primary-color); border-color: var(--primary-color); }
+.hidden-checkbox-radio:checked + .custom-checkbox::after { opacity: 1; }
+.custom-radio { width: 20px; height: 20px; border: 2px solid var(--border-color); border-radius: 50%; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-normal); position: relative; }
+.custom-radio::after { content: ''; width: 10px; height: 10px; background-color: white; border-radius: 50%; transform: scale(0); transition: transform 0.2s ease-in-out; }
+.hidden-checkbox-radio:checked + .custom-radio { border-color: var(--primary-color); background-color: var(--primary-color); }
+.hidden-checkbox-radio:checked + .custom-radio::after { transform: scale(1); }
+
+.toggle-group { display: flex; flex-direction: column; gap: 0.75rem; }
+.toggle-label { display: flex; align-items: center; cursor: pointer; user-select: none; }
+.hidden-toggle { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-switch { position: relative; width: 44px; height: 24px; background-color: var(--border-color); border-radius: 9999px; margin-right: 0.75rem; transition: var(--transition-normal); flex-shrink: 0; }
+.toggle-switch::before { content: ''; position: absolute; width: 16px; height: 16px; background-color: white; border-radius: 50%; top: 4px; left: 4px; transition: transform 0.2s ease-in-out; }
+.hidden-toggle:checked + .toggle-switch { background-color: var(--primary-color); }
+.hidden-toggle:checked + .toggle-switch::before { transform: translateX(20px); }
+
+.hidden { display: none !important; }
+
+/* --- 16. PARSER / PROGRESS BAR --- */
+.parser-container { display: flex; flex-direction: column; gap: 2rem; min-height: 700px; }
+.progress-bar-container { width: 100%; background-color: var(--border-color); border-radius: var(--border-radius); overflow: hidden; height: 20px; flex-grow: 1; }
+.progress-bar { width: 0%; height: 100%; background-color: var(--primary-color); transition: width 0.3s ease-in-out; }
+.progress-wrapper { display: flex; align-items: center; gap: 1rem; }
+.progress-percentage { font-weight: 500; color: var(--text-color-secondary); font-size: 0.875rem; flex-shrink: 0; }
+
+/* --- 17. COMMENTI --- */
+.comment-form { position: relative; display: flex; flex-direction: column; }
+#comment-form textarea { width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.75rem; resize: vertical; }
+#save-comment-btn { align-self: flex-end; }
+.comment-list-container { margin-top: 2rem; max-height: 400px; overflow-y: auto; }
+.comment-list-container hr { border: none; border-top: 1px solid #E5E7EB; margin: 1.5rem 0; }
+.comment-list-title { font-size: 1.1rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; }
+#comment-list { display: flex; flex-direction: column; gap: 1rem; }
+.comment-item { background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; }
+.comment-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB; }
+.comment-user { font-weight: 600; color: #111827; display: flex; align-items: center; gap: 0.5rem; }
+.comment-user::before { content: ''; display: inline-block; width: 16px; height: 16px; flex-shrink: 0; background-color: #4B5563; mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>'); mask-size: cover; }
+.comment-date { font-size: 0.75rem; color: #6B7280; margin-left: auto; padding-left: 1rem; flex-shrink: 0; }
+.comment-body { color: #374151; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; padding: 1rem 1.25rem; }
+
+/* --- 18. DOCUMENTI (Stili file) --- */
+.file-preview-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 6px; background-color: #F9FAFB; border: 1px solid #E5E7EB; border-left: 4px solid var(--primary-color); position: relative; overflow: hidden; transition: var(--transition-fast); }
+.file-preview-item.pending-file { background-color: #fff; border: 1px dashed #D1D5DB; }
+.file-icon-wrapper { position: relative; flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.file-icon-wrapper .file-icon { display: block; width: 24px; height: 24px; color: #4B5563; }
+.file-icon-wrapper .loader-small { display: none; width: 20px; height: 20px; border: 2px solid #E5E7EB; border-top-color: #465FFF; border-radius: 50%; animation: spin 0.8s linear infinite; position: absolute; }
+.file-details { flex-grow: 1; min-width: 0; }
+.file-name, .file-name-link { font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.file-name-link:hover { text-decoration: underline; }
+.file-size, .file-meta { font-size: 0.8rem; color: #6B7280; }
+.file-meta { margin-top: 4px; }
+.file-description-input { width: 100%; border: 1px solid #D1D5DB; border-radius: 4px; padding: 0.5rem; font-size: 0.8rem; margin-top: 0.5rem; }
+.file-description-input:focus { outline: none; border-color: #465FFF; box-shadow: 0 0 0 1px #465FFF; }
+.file-description-display { font-style: italic; color: #374151; margin-top: 0.35rem; margin-bottom: 0.25rem; padding-left: 0.5rem; border-left: 3px solid #E5E7EB; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; }
+.file-actions { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+.remove-file-btn { background: none; border: none; color: #9CA3AF; font-size: 1.5rem; font-weight: 300; cursor: pointer; padding: 0 0.25rem; }
+.remove-file-btn:hover { color: #EF4444; }
+.file-preview-item.is-uploading .file-icon { display: none; }
+.file-preview-item.is-uploading .loader-small { display: block; }
+
+/* --- 19. MENTIONS DROPDOWN --- */
+/* (Aggiunto position: relative al .comment-form nella sezione 17) */
+.mentions-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    margin-top: 4px;
+}
+.mention-item { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; }
+.mention-item:last-child { border-bottom: none; }
+.mention-item:hover { background-color: var(--body-bg); }
+.mention-item.highlight { background-color: var(--primary-color); color: #fff; }
+.mention-item .mention-name { font-weight: 600; color: inherit; }
+.mention-item .mention-email { font-size: 0.8rem; color: var(--text-color-secondary); }
+.mention-item.highlight .mention-email { color: #E0E7FF; }
+
+
+/* ========================================================================
+   CSS UNIFICATO PER CONFERMA ELIMINAZIONE
+   (Sostituisce lo stile duplicato della Sezione 12)
+   ======================================================================== */
+
+/* 1. Contenitore 'td' della tabella */
+td.confirming-delete {
+    position: relative;
+    overflow: hidden; 
+}
+td.confirming-delete > .btn-edit,
+td.confirming-delete > .btn-delete {
+    visibility: hidden; /* Nasconde i pulsanti originali */
+}
+
+/* 2. Contenitore '.file-preview-item' del documento */
+/* (overflow: hidden e position: relative sono già stati aggiunti
+   nella sezione 18 per .file-preview-item) */
+
+/* 3. Overlay di conferma (stile unificato per TUTTI) */
+.delete-confirmation-overlay {
+    position: absolute;
+    right: 0;
+    left: 0;
+    
+    /* OCCUPA TUTTA L'ALTEZZA */
+    top: 0;
+    bottom: 0; 
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    
+    /* SFONDO ROSSO SEMI-TRASPARENTE */
+    background-color: rgba(220, 38, 38, 0.95); 
+    color: white;
+    
+    /* Animazione slide-in da destra */
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 1rem;
+    z-index: 2; /* Assicura che stia sopra il testo */
+}
+
+/* 4. Stato attivo (visibile) unificato */
+.delete-confirmation-overlay.active {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* 5. Stili per i pulsanti (definiti qui per unificare) */
+.delete-confirmation-overlay .btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.delete-confirmation-overlay .btn-light {
+    background-color: #fff;
+    color: #DC2626; /* Rosso */
+    border: 1px solid #fff;
+}
+.delete-confirmation-overlay .btn-outline-light {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+}
+.delete-confirmation-overlay .btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* --- Stili per i Badge di Stato nella Tabella --- */
+
+/* 1. Stile Base del Badge */
+.status-badge {
+    display: inline-block; /* Per permettere padding e allineamento */
+    padding: 0.25rem 0.75rem; /* Spaziatura interna (verticale, orizzontale) */
+    border-radius: 9999px; /* Forma a pillola */
+    font-size: 0.75rem; /* Testo leggermente più piccolo */
+    font-weight: 600; /* Testo in grassetto */
+    line-height: 1.2; /* Altezza linea */
+    text-transform: capitalize; /* Prima lettera maiuscola */
+}
+
+/* 2. Colore Verde (Attivo) */
+.status--attivo {
+    color: #057A55; /* Testo verde scuro */
+    background-color: #DEF7EC; /* Sfondo verde chiaro */
+}
+/* Colore Verde (Dark Mode) */
+.dark-mode .status--attivo {
+    color: #34D399; /* Testo verde brillante */
+    background-color: rgba(16, 185, 129, 0.2); /* Sfondo verde scuro trasparente */
+}
+
+/* 3. Colore Rosso (Non Attivo) */
+.status--non-attivo {
+    color: #C81E1E; /* Testo rosso scuro */
+    background-color: #FDE8E8; /* Sfondo rosso chiaro */
+}
+/* Colore Rosso (Dark Mode) */
+.dark-mode .status--non-attivo {
+    color: #F87171; /* Testo rosso brillante */
+    background-color: rgba(239, 68, 68, 0.2); /* Sfondo rosso scuro trasparente */
+}
+
+/* 4. Esempio Colore Giallo (Es. "In Attesa") */
+.status--in-attesa {
+    color: #9A5B00; /* Testo giallo/marrone scuro */
+    background-color: #FEF3C7; /* Sfondo giallo chiaro */
+}
+/* Colore Giallo (Dark Mode) */
+.dark-mode .status--in-attesa {
+    color: #FCD34D; /* Testo giallo brillante */
+    background-color: rgba(245, 158, 11, 0.2); /* Sfondo giallo scuro trasparente */
+}
+
+/* Aggiungi altri colori se necessario (es. blu per "Completato", grigio per "Archiviato") */
+/* --- Stili Dark Mode per Commenti e Documenti --- */
+
+/* ========================================================================
+   DARK MODE STYLES - Commenti e Documenti
+   ======================================================================== */
+
+.dark-mode {
+    /* --- Commenti --- */
+
+    /* Card del commento */
+    .comment-item {
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+    }
+
+    /* Header e riga separatrice */
+    .comment-header {
+        border-bottom-color: var(--border-color); 
+    }
+
+    /* Icona utente */
+    .comment-user::before {
+        background-color: var(--sidebar-text); /* Grigio chiaro */
+    }
+
+    /* Nome utente */
+    .comment-user {
+        color: var(--text-color-primary); /* Testo principale chiaro */
+    }
+    
+    /* Data commento */
+    .comment-date {
+        color: var(--text-color-secondary); /* Testo secondario chiaro */
+    }
+
+    /* Corpo del commento */
+    .comment-body {
+        color: var(--text-color-secondary); /* Testo secondario chiaro */
+    }
+    
+    /* Titolo lista commenti */
+    .comment-list-title {
+        color: var(--text-color-primary); /* Testo principale chiaro */
+    }
+
+    /* Riga separatrice sotto il form */
+    .comment-list-container hr {
+        border-top-color: var(--border-color); 
+    }
+
+    /* --- Documenti --- */
+
+    /* Box file esistente */
+    .file-preview-item.existing-file {
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+    }
+
+    /* Box file in attesa */
+    .file-preview-item.pending-file {
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+    }
+    
+    /* Icona file (SVG) */
+    .file-icon path, 
+    .file-icon polyline, 
+    .file-icon line {
+        stroke: var(--text-color-secondary); /* Usa stroke per icone outline */
+        fill: none;
+    }
+    .file-icon path[fill] {
+        fill: var(--text-color-secondary); /* Usa fill per icone piene */
+        stroke: none;
+    }
+    /* Fallback generico per l'icona */
+    .file-icon {
+        color: var(--text-color-secondary);
+    }
+
+    /* Dettagli file (nome, link) */
+    .file-name,
+    .file-name-link {
+        color: var(--text-color-primary); /* Testo principale chiaro */
+    }
+    
+    /* Dettagli file (meta, size) */
+    .file-meta, 
+    .file-size {
+        color: var(--text-color-secondary); /* Testo secondario chiaro */
+    }
+
+    /* Descrizione visualizzata */
+    .file-description-display {
+        color: var(--text-color-secondary);
+        border-left-color: var(--border-color);
+    }
+
+    /* Input descrizione */
+    .file-description-input {
+        background-color: var(--body-bg); 
+        border-color: var(--border-color);
+        color: var(--text-color-primary);
+    }
+    .file-description-input:focus {
+         border-color: var(--primary-color);
+         box-shadow: 0 0 0 1px var(--primary-color);
+    }
+
+    /* --- Stato Vuoto (usato da entrambi) --- */
+    .empty-state {
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+        color: var(--text-color-secondary); 
+    }
+
+    /* --- Tendina @Mentions --- */
+    .mentions-dropdown {
+        background-color: var(--container-bg);
+        border-color: var(--border-color);
+    }
+    .mention-item {
+        border-bottom-color: var(--border-color);
+    }
+    .mention-item:hover {
+        background-color: var(--body-bg);
+    }
+    .mention-item.highlight {
+        background-color: var(--primary-color); 
+        color: #fff;
+    }
+    .mention-item .mention-name {
+         /* Eredita colore (bianco se highlight) */
+         color: inherit;
+    }
+    .mention-item .mention-email {
+        color: var(--text-color-secondary); /* Testo secondario chiaro */
+    }
+    .mention-item.highlight .mention-email {
+        color: #e2e8f0; /* Grigio chiarissimo per stato highlight */
+    }
+}
+
+/* --- Stili per Campi Form Non Validi (Aggiornato) --- */
+
+/* Applica a input, select, textarea */
+.is-invalid {
+    border-color: var(--danger-color) !important; /* Bordo rosso */
+    /* Rimosso box-shadow */
+}
+
+/* Specifica per i contenitori multiselect */
+.multiselect-container.is-invalid .multiselect-input-wrapper {
+    border-color: var(--danger-color) !important; /* Bordo rosso */
+     /* Rimosso box-shadow */
+}
+
+/* --- LAYOUT BASE KANBAN --- */
+
+.kanban-board {
+    display: flex; 
+    gap: 1.5rem; 
+    padding-top: 1rem;
+    padding-bottom: 1rem; 
+    overflow-x: auto; 
+    min-height: 70vh; 
+}
+
+.kanban-column {
+    flex: 0 0 300px; 
+    /* 1. Usa lo sfondo del container (bianco in light mode) */
+    background-color: var(--container-bg); 
+    border: 1px solid var(--border-color); /* Mantieni un bordo leggero */
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex; 
+    flex-direction: column; 
+    max-height: 80vh; 
+    /* Aggiungi un'ombra leggera alla colonna stessa */
+    box-shadow: var(--shadow); 
+}
+
+/* --- Header della Colonna --- */
+/* ... (gli stili per header, titolo, conteggio rimangono uguali) ... */
+.kanban-column-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; 
+}
+.kanban-column-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.kanban-column-count {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    /* Usa lo sfondo del body per il badge, così contrasta con la colonna bianca */
+    background-color: var(--body-bg); 
+    padding: 0.1rem 0.5rem;
+    border-radius: 6px;
+    margin-left: 0.5rem;
+    flex-shrink: 0; 
+}
+
+
+/* --- Contenitore delle Card --- */
+/* ... (gli stili per .kanban-cards e scrollbar rimangono uguali) ... */
+.kanban-cards {
+    flex-grow: 1; 
+    overflow-y: auto; 
+    min-height: 100px; 
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; 
+    padding: 5px 5px 5px 0; 
+    margin-right: -5px; 
+}
+.kanban-cards::-webkit-scrollbar { width: 6px; }
+.kanban-cards::-webkit-scrollbar-track { background: transparent; margin-top: 5px; margin-bottom: 5px; }
+.kanban-cards::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+
+
+/* --- Card Kanban --- */
+.kanban-card { background-color: var(--container-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1rem; box-shadow: var(--shadow-sm); cursor: grab; transition: var(--transition-normal), transform 0.15s var(--transition-easing); }
+.kanban-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+.kanban-card:active { cursor: grabbing; transform: translateY(-1px) scale(1.01); box-shadow: var(--shadow-lg); }
+
+/* ... (gli stili per titolo e meta della card rimangono uguali) ... */
+.kanban-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    margin: 0 0 0.5rem 0;
+    word-break: break-word; 
+}
+.kanban-card__meta {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-color);
+    margin-top: 0.75rem;
+}
+.kanban-card__meta span { display: flex; align-items: center; gap: 0.3rem; }
+.kanban-card__meta svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--text-color-secondary); }
+
+
+/* --- Stili Drag & Drop (SortableJS) --- */
+/* ... (invariati) ... */
+.sortable-ghost { opacity: 0.4; background: var(--primary-hover); border: 1px dashed var(--primary-color); border-radius: var(--border-radius); }
+.sortable-chosen { }
+
+/* --- Loader nelle Colonne --- */
+/* ... (invariati) ... */
+.kanban-cards .column-loader { min-height: 150px; background-color: transparent; display: flex; align-items: center; justify-content: center; width: 100%; }
+.kanban-cards .column-loader .loader { width: 32px; height: 32px; border-width: 4px; border-bottom-color: var(--primary-color); }
+
+/* --- Stato Vuoto --- */
+/* ... (invariati) ... */
+.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-color-secondary); font-style: italic; background-color: transparent; border: none; border-radius: 8px; margin-top: 2rem; }
+.empty-state.error { color: var(--danger-color); font-style: normal; font-weight: 500; }
+
+
+/* ========================================================================
+   DARK MODE - Stili Kanban (Aggiornati)
+   ======================================================================== */
+.dark-mode {
+
+    .kanban-column {
+        /* 3. Usa lo sfondo del container (scuro in dark mode) */
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+        box-shadow: var(--shadow); /* Mantieni l'ombra anche in dark mode */
+    }
+
+    .kanban-column-header {
+         border-bottom-color: var(--border-color);
+     }
+     .kanban-column-title {
+         color: var(--text-color-primary); 
+     }
+     .kanban-column-count {
+        /* Badge: Usa lo sfondo del body (più scuro) per contrasto */
+        background-color: var(--body-bg); 
+        color: var(--text-color-secondary);
+    }
+
+    .kanban-card {
+        /* 4. Usa lo sfondo del container (scuro) ma assicurati che l'ombra sia visibile */
+        background-color: var(--container-bg); 
+        border-color: var(--border-color); 
+        /* Potrebbe essere necessario regolare --shadow in .dark-mode se non si vede */
+         box-shadow: var(--shadow); 
+    }
+    .kanban-card__title {
+        color: var(--text-color-primary); 
+    }
+    .kanban-card__meta {
+        color: var(--text-color-secondary); 
+        border-top-color: var(--border-color); 
+    }
+    .kanban-card__meta svg {
+         color: var(--text-color-secondary); 
+    }
+
+    .kanban-cards::-webkit-scrollbar-thumb {
+         background-color: rgba(255,255,255,0.15); 
+    }
+
+    .empty-state {
+        color: var(--text-color-secondary);
+    }
+    .empty-state.error {
+         color: var(--danger-color);
+    }
+    
+    .kanban-cards .column-loader .loader {
+          border-color: rgba(255, 255, 255, 0.2); 
+          border-bottom-color: var(--primary-color); 
+     }
+}
+/* --- Stili Badge Conteggio Colorati --- */
+
+/* Base (già presente, ma assicurati che ci sia) */
+.kanban-column-count { font-size: 0.9rem; font-weight: 500; padding: 0.1rem 0.5rem; border-radius: 6px; margin-left: 0.5rem; color: #fff; transition: var(--transition-normal); }
+
+/* Verde (es. In Lavorazione) */
+.count-badge--in_lavorazione {
+    background-color: #10B981; /* Verde (success-color) */
+    color: #fff;
+}
+.dark-mode .count-badge--in_lavorazione {
+    background-color: #059669; /* Verde più scuro */
+}
+
+/* Giallo (es. In Attesa) */
+.count-badge--in_attesa {
+    background-color: #F59E0B; /* Giallo/Arancio */
+    color: #fff; /* Testo bianco sta bene anche qui */
+}
+.dark-mode .count-badge--in_attesa {
+    background-color: #D97706; /* Giallo/Arancio più scuro */
+}
+
+/* Blu (es. Completato) */
+.count-badge--completato {
+    background-color: var(--primary-color); /* Blu primario */
+    color: #fff;
+}
+.dark-mode .count-badge--completato {
+    background-color: var(--primary-hover); /* Blu più scuro */
+}
+
+/* Rosso (es. Bloccato) */
+.count-badge--bloccato {
+    background-color: var(--danger-color); /* Rosso */
+    color: #fff;
+}
+.dark-mode .count-badge--bloccato {
+    background-color: var(--danger-hover); /* Rosso più scuro */
+}
+
+/* Stile fallback (se lo step non matcha) */
+.kanban-column-count:not([class*="count-badge--"]) {
+    background-color: var(--body-bg);
+    color: var(--text-color-secondary);
+}
+.dark-mode .kanban-column-count:not([class*="count-badge--"]) {
+     background-color: var(--container-bg);
+     color: var(--text-color-secondary);
+}
+
+.ref-entity-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ========================================================================
+   MODERN ENHANCEMENTS
+   ======================================================================== */
+*:focus-visible { outline: none; box-shadow: var(--shadow-focus); border-radius: 4px; }
+
+
+
+
+
+
+
+.container, .data-table-container, .metric-item, .kanban-column { border: none; box-shadow: var(--shadow); transition: var(--transition-normal); }
+
+
+
+
+thead { background-color: var(--container-bg); }
+th { border-bottom: 2px solid var(--border-color); }
+tbody tr { transition: var(--transition-fast); }
+tbody tr:hover { background-color: var(--body-bg); transform: scale(1.01); box-shadow: var(--shadow-lg); border-radius: var(--border-radius); }
+tbody tr:hover td:first-child { border-top-left-radius: var(--border-radius); border-bottom-left-radius: var(--border-radius); }
+tbody tr:hover td:last-child { border-top-right-radius: var(--border-radius); border-bottom-right-radius: var(--border-radius); }
+
+
+.multiselect-dropdown { border: none; box-shadow: var(--shadow-lg); display: block; opacity: 0; transform: translateY(10px) scale(0.95); visibility: hidden; transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0.15s; pointer-events: none; }
+.multiselect-container.open .multiselect-dropdown { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; }
+
+
+
+/* ========================================================================
+   FIX RESPONSIVE - Dashboard (Flexbox Auto-Centrante)
+   ======================================================================== */
+
+/* --- 1. Fix Generali (Testo, Legenda, Grafico) --- */
+/* (Questi sono ancora necessari per evitare overflow) */
+
+.main-content {
+    overflow-x: hidden; /* Previene scrollbar orizzontale */
+}
+.metric-item__value,
+.metric-item__label {
+    overflow-wrap: break-word; /* Manda a capo testi lunghi */
+}
+.metric-item__footer {
+    flex-wrap: wrap; 
+    gap: 0.5rem; 
+}
+.apexcharts-legend {
+    flex-wrap: wrap !important; /* Manda a capo la leggenda */
+    justify-content: center;
+}
+.metric-item .apexcharts-canvas,
+.metric-item > div[id^="apexchart"] {
+    max-width: 100%; /* Impedisce al grafico di strabordare */
+    overflow: hidden;
+}
+
+/* --- 2. Logica di Layout (Grid e Flexbox) --- */
+
+/* MOBILE (< 640px): 1 colonna (Grid) */
+@media (max-width: 639px) {
+    .metric-grid {
+        display: grid; 
+        grid-template-columns: 1fr;
+    }
+    .metric-item--span-2,
+    .metric-item--span-3,
+    .metric-item--span-6 {
+        grid-column: span 1; 
+    }
+}
+
+/* TABLET (640px - 1279px): Centrato con FLEXBOX (Logica Robusta) */
+@media (min-width: 640px) and (max-width: 1279px) {
+    
+    .metric-grid {
+        display: flex; /* USA FLEXBOX */
+        flex-wrap: wrap; /* Permette di andare a capo */
+        justify-content: center; /* CENTRA LE RIGHE */
+        gap: 1.5rem; /* Spazio tra i box */
+    }
+    
+    /* * QUESTA È LA SOLUZIONE:
+     * flex: 1 1 280px;
+     * 1 (grow): Permetti al box di crescere se c'è spazio
+     * 1 (shrink): Permetti al box di stringersi se serve
+     * 280px (basis): Dì al box che la sua larghezza "ideale" è 280px
+     */
+    .metric-item--span-2,
+    .metric-item--span-3 {
+        flex: 1 1 280px;
+        /* Diamo un max-width per evitare che un singolo box
+           in una riga diventi enorme */
+        max-width: 350px; 
+    }
+
+    /* I grafici grandi occupano tutta la larghezza */
+    .metric-item--span-6 {
+        flex-basis: 100%; /* Forza il grafico ad andare a capo e occupare tutto */
+    }
+}
+
+/* DESKTOP (>= 1280px): 6 colonne (Grid) */
+@media (min-width: 1280px) {
+    
+    .metric-grid {
+        display: grid; /* Torna a GRID */
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1.5rem; 
+    }
+    
+    /* Ripristina i valori di span e flex */
+    .metric-item--span-2 {
+        grid-column: span 2;
+        flex: auto; 
+    }
+    .metric-item--span-3 {
+        grid-column: span 3;
+        flex: auto;
+    }
+    .metric-item--span-6 {
+        grid-column: span 6;
+        flex: auto;
+    }
+}
+
+
+/* ========================================================================
+   CSS WIZARD CONTRATTO
+   ======================================================================== */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.flex-grow { flex-grow: 1; }
+.gap-4 { gap: 1rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+
+/* --- 2. LAYOUT DEL WIZARD (Passi e Contenitori) --- */
+
+/* Nasconde e mostra i singoli step del wizard */
+.step { 
+    display: none; 
+} 
+.step.active { 
+    display: block; 
+}
+
+/* Stile per l'intestazione contestuale del Passo 3 */
+#current-pratica-info {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem !important;
+    border-bottom: 2px solid var(--border-color);
+}
+.dark-mode #current-pratica-info {
+    color: var(--primary-color);
+    border-bottom-color: var(--border-color);
+}
+
+/* Base per i Box di Pratiche e Linee (Passo 2 e 3) */
+#pratiche-overview-container > div,
+#linee-list-container > div {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm); 
+    border: 1px solid var(--border-color);
+    background-color: var(--container-bg);
+    transition: all 0.2s ease;
+}
+
+/* Effetto al passaggio del mouse sui box */
+#pratiche-overview-container > div:hover,
+#linee-list-container > div:hover {
+    box-shadow: var(--shadow); 
+    transform: translateY(-1px);
+}
+
+/* Bordo colorato a sinistra per i box delle Pratiche */
+#pratiche-overview-container > div {
+    border-left-width: 5px;
+    border-left-style: solid;
+    border-left-color: var(--primary-color);
+}
+
+/* Bordo colorato a sinistra per i box delle Linee */
+#linee-list-container > div {
+    border-left-width: 5px;
+    border-left-style: solid;
+    border-left-color: var(--success-color); 
+}
+
+/* --- 3. STEPPER VISIVO (NAVIGAZIONE A PALLINI) --- */
+
+#wizard-container {
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+#multiStepForm {
+    max-width: 95%;
+    margin: 0 20%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.step.active {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.step .form-footer {
+    margin-top: auto;
+}
+
+.wizard-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; 
+    padding-bottom: 1.5rem;
+    position: relative;
+}
+
+.step-item::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: calc(50% + 18px);
+    width: calc(100% - 36px);
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 0;
+}
+
+.step-item:last-child::after {
+    display: none;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1; 
+    position: relative;
+    z-index: 1; 
+    cursor: default; 
+    margin: 0; /* Rimuove margini impliciti laterali */
+    padding: 0;
+}
+
+.step-circle { width: 36px; height: 36px; border-radius: 50%; background-color: var(--body-bg); border: 2px solid var(--border-color); color: var(--text-color-secondary); display: flex; justify-content: center; align-items: center; font-weight: 700; transition: var(--transition-normal); margin-bottom: 0.5rem; }
+.dark-mode .step-circle {
+    background-color: var(--container-bg);
+}
+
+.step-label { font-size: 0.8rem; color: var(--text-color-secondary); transition: var(--transition-normal); max-width: 80px; }
+
+/* Stili per lo step ATTIVO e COMPLETATO */
+.step-item.active .step-circle {
+    background-color: var(--primary-color); 
+    border-color: var(--primary-color);
+    color: #fff; 
+}
+.step-item.active .step-label {
+    color: var(--text-color-primary); 
+    font-weight: 600;
+}
+.step-item.completed .step-circle {
+    border-color: var(--success-color); 
+    color: var(--success-color);
+    background-color: var(--body-bg);
+}
+.dark-mode .step-item.completed .step-circle {
+    background-color: var(--container-bg);
+}
+.step-item[data-step="4"] .step-circle {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+.step-item[data-step="4"].active .step-circle {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+/* --- 4. FIX e Stili Form nel Drawer (per visibilità) --- */
+
+/* Assicura che i form nel drawer siano inizialmente nascosti */
+#pratica-form-container, #linea-form-container {
+    /* Il contenuto sarà gestito dal JS che aggiunge/rimuove la classe .hidden */
+    padding: 1.5rem; /* Aggiunge padding per i form all'interno del drawer */
+}
+#linea-form-container.hidden, #pratica-form-container.hidden {
+    display: none;
+}
+
+#open-pratica-drawer-btn, #open-linea-drawer-btn {
+    width: fit-content;
+}
+/* --- NOTIFICATIONS DROPDOWN --- */
+.notifications-wrapper {
+    position: relative;
+}
+
+.notifications-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color-secondary);
+    transition: var(--transition-fast);
+}
+
+.notifications-btn:hover {
+    background-color: var(--body-bg);
+    color: var(--text-color-primary);
+}
+
+.notifications-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notifications-badge.hidden {
+    display: none;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 380px;
+    max-height: 480px;
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s var(--transition-easing);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.notifications-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notifications-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notifications-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    margin: 0;
+}
+
+.notifications-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 360px;
+}
+
+.notifications-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.loader-small {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.notification-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition-fast);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: var(--body-bg);
+}
+
+.notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.dark-mode .notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.notification-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.notification-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notification-icon.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+}
+
+.notification-icon.warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.notification-icon.success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.notification-icon.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    margin-left: 40px;
+}
+
+.notification-unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notifications-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-color-secondary);
+}
+
+.notifications-empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.notifications-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--body-bg);
+    border-radius: 0 0 12px 12px;
+}
+
+.view-all-link {
+    display: block;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-color);
+    transition: var(--transition-fast);
+}
+
+.view-all-link:hover {
+    color: var(--primary-hover);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .notifications-dropdown {
+        width: calc(100vw - 32px);
+        right: -120px;
+    }
+}
+
+/* --- TIMELINE DELLE AZIONI --- */
+.timeline-container {
+    padding: 1rem 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 0 0 4px var(--container-bg);
+}
+
+.timeline-marker svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: white;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 1.25rem;
+    top: 2.5rem;
+    bottom: -2rem;
+    width: 2px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.timeline-content {
+    background-color: var(--body-bg);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    transition: var(--transition-fast);
+}
+
+.timeline-content:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--primary-color);
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-action {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+}
+
+.timeline-user {
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.timeline-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.metadata-item {
+    background-color: var(--container-bg);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+}
+
+.timeline-changes {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.changes-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color-primary);
+}
+
+.change-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.change-field {
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    min-width: 100px;
+}
+
+.change-old {
+    color: var(--danger-color);
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.change-arrow {
+    color: var(--text-color-secondary);
+}
+
+.change-new {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.timeline-data {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.data-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color-primary);
+}
+
+.data-summary {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.data-item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.data-key {
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    min-width: 100px;
+}
+
+.data-value {
+    color: var(--text-color-primary);
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-color-secondary);
+    font-style: italic;
+}

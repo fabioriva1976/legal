@@ -1,0 +1,7 @@
+.lh/*
+firebase-debug.log
+firestore-debug.log
+.lh/.gitignore.json
+# Emulator data
+emulator-data/
+node_modules/*
