@@ -5,7 +5,8 @@ import { collection, query, where, getDocs, doc, getDoc } from "https://www.gsta
 
 //pagine standard
 import { initPageDocumentiPage } from './page-documenti.js';
-import { initPageAiChatPage } from './page-ai-chat.js';
+import { initPageAiChatPage } from './page-pratica.js';
+import { initPageChatListPage } from './page-pratiche.js';
 //anagrafica
 import { initPageAnagraficaUtentiPage } from './anagrafica-utenti.js';
 import { initPageAnagraficaClientiPage } from './anagrafica-clienti.js';
@@ -22,7 +23,8 @@ const CACHE_KEY = 'datiUtenteProfilo';
 // Mappa funzioni init per page
 const pageInitializers = {
     'page-documenti': initPageDocumentiPage,
-    'page-ai-chat': initPageAiChatPage,
+    'page-pratica': initPageAiChatPage,
+    'page-pratiche': initPageChatListPage,
     //anagrafica
     'anagrafica-utenti': initPageAnagraficaUtentiPage,
     'anagrafica-clienti': initPageAnagraficaClientiPage,
@@ -256,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (link.id === 'back-to-app-btn') {
                 e.preventDefault();
-                history.pushState({}, '', '/page-ai-chat.html');
+                history.pushState({}, '', '/page-pratica.html');
                 router();
                 return;
             }
@@ -304,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let pageName = path.replace('.html', '');
         console.log('🌐 Router - path:', path, '| pageName:', pageName);
         if (pageName === '' || pageName === 'index') {
-            pageName = 'page-ai-chat';
+            pageName = 'page-pratiche';
         }
 
         // Carica la sidebar corretta per l'area corrente

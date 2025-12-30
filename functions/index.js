@@ -2,6 +2,16 @@
 
 // --- INIZIALIZZAZIONE ADMIN SDK ---
 const admin = require("firebase-admin");
+
+// Configura emulator per Storage se in modalità emulatore
+if (process.env.FUNCTIONS_EMULATOR === 'true') {
+    // Imposta l'host dell'emulatore Storage se non già impostato
+    if (!process.env.FIREBASE_STORAGE_EMULATOR_HOST) {
+        process.env.FIREBASE_STORAGE_EMULATOR_HOST = 'localhost:9299';
+        console.log('🔧 Set FIREBASE_STORAGE_EMULATOR_HOST=localhost:9299');
+    }
+}
+
 admin.initializeApp();
 
 // --- CONFIGURAZIONE GLOBALE ---
@@ -32,6 +42,7 @@ exports.timezone = "Europe/Rome";
 
 // === FUNZIONI API - PAGINE ===
 exports.ragChatApi = require("./api/page-ragChat").ragChatApi;
+exports.extractTextFromFileApi = require("./api/extractTextFromFile").extractTextFromFileApi;
 
 // === FUNZIONI API - TEST CONFIGURAZIONI ===
 exports.testSmtpApi = require("./api/testConfig-smtp").testSmtpApi;

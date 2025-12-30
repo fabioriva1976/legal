@@ -37,28 +37,63 @@ const userListApi = onCall({ region: region }, async (request) => {
 });
 
 /**
- * Crea un nuovo utente.
+ * Crea un nuovo utente o sincronizza un utente esistente.
+ * Se l'utente esiste già in Auth, restituisce il suo UID per permettere
+ * la sincronizzazione con Firestore.
  */
 const userCreateApi = onCall({ region: region }, async (request) => {
     try {
         const data = request.data;
         const context = request;
 
-        const userRecord = await auth.createUser({
-            email: data.email,
-            password: data.password,
-            displayName: data.displayName,
-            disabled: data.disabled,
-        });
+        let userRecord;
+        let wasExisting = false;
 
-        console.log("Utente creato con successo:", userRecord.uid);
+        try {
+            // Prova a creare il nuovo utente
+            userRecord = await auth.createUser({
+                email: data.email,
+                password: data.password,
+                displayName: data.displayName,
+                disabled: data.disabled,
+            });
+
+            console.log("Utente creato con successo:", userRecord.uid);
+
+        } catch (error) {
+            // Se l'utente esiste già (email duplicata)
+            if (error.code === 'auth/email-already-exists') {
+                console.log("Utente già esistente in Auth, recupero i dati:", data.email);
+
+                // Recupera l'utente esistente tramite email
+                userRecord = await auth.getUserByEmail(data.email);
+                wasExisting = true;
+
+                // Aggiorna i dati dell'utente esistente con i nuovi valori
+                await auth.updateUser(userRecord.uid, {
+                    displayName: data.displayName,
+                    disabled: data.disabled,
+                });
+
+                console.log("Utente esistente sincronizzato:", userRecord.uid);
+            } else {
+                // Se è un altro tipo di errore, lancialo
+                throw error;
+            }
+        }
 
         // NOTA: L'audit log viene gestito dal trigger Firestore onUtentiChange
         // quando il frontend salva i dati nella collezione 'utenti'
 
-        return { uid: userRecord.uid, message: "Utente creato con successo!" };
+        return {
+            uid: userRecord.uid,
+            message: wasExisting
+                ? "Utente già esistente in Auth, sincronizzato con successo!"
+                : "Utente creato con successo!",
+            wasExisting: wasExisting
+        };
     } catch (error) {
-        console.error("Errore nella creazione utente:", error);
+        console.error("Errore nella creazione/sincronizzazione utente:", error);
         throw new HttpsError('internal', error.message);
     }
 });

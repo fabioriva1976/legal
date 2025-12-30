@@ -251,20 +251,58 @@ async function saveEntity(e) {
 }
 
 function setupTableClickHandlers() {
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const id = btn.dataset.id;
-            await loadEntity(id);
+    const resetAllDeleteButtons = () => {
+        document.querySelectorAll('.delete-confirmation-overlay').forEach(overlay => {
+            const td = overlay.closest('td');
+            if (td) td.classList.remove('confirming-delete');
+            overlay.remove();
         });
-    });
+    };
 
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const id = btn.dataset.id;
-            if (confirm('Sei sicuro di voler eliminare questo documento?')) {
-                await deleteEntity(id);
-            }
-        });
+    document.getElementById('data-table').addEventListener('click', function(event) {
+        const target = event.target;
+
+        // Gestisci conferma eliminazione (Sì)
+        const confirmYesButton = target.closest('.btn-confirm-yes');
+        if (confirmYesButton) {
+            deleteEntity(confirmYesButton.dataset.id);
+            resetAllDeleteButtons();
+            return;
+        }
+
+        // Gestisci annulla eliminazione (No)
+        const confirmNoButton = target.closest('.btn-confirm-no');
+        if (confirmNoButton) {
+            resetAllDeleteButtons();
+            return;
+        }
+
+        // Gestisci pulsante Modifica
+        const editButton = target.closest('.btn-edit');
+        if (editButton) {
+            resetAllDeleteButtons();
+            loadEntity(editButton.dataset.id);
+            return;
+        }
+
+        // Gestisci pulsante Elimina
+        const deleteButton = target.closest('.btn-delete');
+        if (deleteButton) {
+            resetAllDeleteButtons();
+            const td = deleteButton.closest('td');
+            if (!td) return;
+
+            td.classList.add('confirming-delete');
+            const overlay = document.createElement('div');
+            overlay.className = 'delete-confirmation-overlay';
+            overlay.innerHTML = `
+                <span>Sei sicuro?</span>
+                <button class="btn btn-sm btn-light btn-confirm-yes" data-id="${deleteButton.dataset.id}">Sì</button>
+                <button class="btn btn-sm btn-outline-light btn-confirm-no">No</button>
+            `;
+            td.appendChild(overlay);
+            setTimeout(() => { overlay.classList.add('active'); }, 10);
+        }
     });
 }
 
@@ -311,6 +349,12 @@ async function loadEntity(id) {
 
 async function deleteEntity(id) {
     try {
+        console.log('Tentativo di eliminare documento con ID:', id);
+
+        if (!id || typeof id !== 'string' || id.trim() === '') {
+            throw new Error('ID documento non valido');
+        }
+
         // Get document data to delete associated file
         const docSnap = await getDoc(doc(db, collection_name, id));
         if (docSnap.exists()) {
@@ -321,19 +365,24 @@ async function deleteEntity(id) {
                 try {
                     const fileRef = ref(storage, data.storagePath);
                     await deleteObject(fileRef);
+                    console.log('✅ File eliminato da Storage:', data.storagePath);
                 } catch (error) {
-                    console.error('Errore nell\'eliminazione del file:', error);
+                    console.error('⚠️ Errore nell\'eliminazione del file da Storage:', error);
+                    // Continua comunque con l'eliminazione del documento
                 }
             }
         }
 
         // Delete document from Firestore
         await deleteDoc(doc(db, collection_name, id));
+        console.log('✅ Documento eliminato da Firestore:', id);
+
+        // Reload entities list
         await loadEntities();
-        ui.showSuccessMessage('save-message', 'Eliminato con successo');
+
     } catch (error) {
-        console.error('Errore nell\'eliminazione:', error);
-        alert('Errore nell\'eliminazione del documento');
+        console.error('❌ Errore nell\'eliminazione del documento:', error);
+        alert('Errore: ' + (error.message || 'Impossibile eliminare il documento'));
     }
 }
 

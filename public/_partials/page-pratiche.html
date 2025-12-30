@@ -1,0 +1,42 @@
+<div class="container">
+    <div class="header">
+        <h1>Le Mie Pratiche</h1>
+        <button class="btn" id="new-entity-btn">Nuova Pratica</button>
+    </div>
+    <table id="data-table"></table>
+</div>
+
+<div id="entity-form-sidebar" class="form-sidebar">
+    <div class="sidebar-header">
+        <h2 id="entity-form-title">Nuova Pratica</h2>
+        <button id="close-sidebar-btn" class="close-btn">&times;</button>
+    </div>
+    <div id="entity-form-container">
+        <form id="entity-form">
+            <input type="hidden" id="entity-id">
+            <div class="form-scroll-area">
+                <div class="form-group">
+                    <label for="client-name">Nome Cliente *</label>
+                    <input type="text" id="client-name" required placeholder="Es: Mario Rossi">
+                </div>
+                <div class="form-group">
+                    <label for="case-id">Identificativo Pratica *</label>
+                    <input type="text" id="case-id" required placeholder="Es: 2024/001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stato</label>
+                    <div class="toggle-group">
+                        <label for="toggle-status" class="toggle-label">
+                            <input type="checkbox" id="toggle-status" class="hidden-toggle" checked>
+                            <span class="toggle-switch"></span>Aperta
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="form-footer">
+            <button type="submit" form="entity-form" class="btn">Salva e Apri</button>
+            <span id="save-message" class="save-message"></span>
+        </div>
+    </div>
+</div>

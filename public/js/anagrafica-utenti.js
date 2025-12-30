@@ -132,6 +132,7 @@ async function saveEntity(e) {
             console.log('Risposta dalla Cloud Function:', result.data);
 
             const uid = result.data.uid;
+            const wasExisting = result.data.wasExisting || false;
             currentEntityId = uid;
             document.getElementById('entity-id').value = uid;
 
@@ -144,17 +145,29 @@ async function saveEntity(e) {
                 telefono: document.getElementById('telefono').value,
                 ruolo: ruoloMultiselect.getValue(),
                 status: document.getElementById('toggle-status').checked,
-                created: now,
                 changed: now,
                 lastModifiedBy: currentUser?.uid || null,
                 lastModifiedByEmail: currentUser?.email || null
             };
+
+            // Se l'utente era già esistente, preserva la data di creazione originale
+            if (!wasExisting) {
+                data.created = now;
+            }
+
             await setDoc(doc(db, collection_name, uid), data, { merge: true });
 
             showTabsForExistingEntity();
             documentUtils.listenForDocuments(uid);
             actionUtils.loadActions(uid);
-            showSaveMessage('save-message');
+
+            // Mostra messaggio appropriato
+            const msgElement = document.getElementById('save-message');
+            msgElement.textContent = wasExisting
+                ? 'Utente sincronizzato con successo (già presente in Auth)'
+                : 'Utente creato con successo';
+            msgElement.style.display = 'inline';
+            setTimeout(() => { msgElement.style.display = 'none'; }, 4000);
 
         } else {
             // Aggiorna utente esistente tramite Cloud Function

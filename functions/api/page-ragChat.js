@@ -1,7 +1,6 @@
-const { onRequest } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { VertexAI } = require("@google-cloud/vertexai");
 const admin = require("firebase-admin");
-const cors = require("cors")({ origin: true });
 
 const { region } = require("../index");
 
@@ -9,60 +8,53 @@ const { region } = require("../index");
  * Cloud Function che integra Vertex AI RAG per rispondere a domande
  * utilizzando i documenti caricati come contesto
  */
-exports.ragChatApi = onRequest({
+exports.ragChatApi = onCall({
     region: region
-}, async (req, res) => {
-    // Gestisci CORS
-    return cors(req, res, async () => {
-        try {
-            // Verifica autenticazione tramite Firebase ID token
-            const authHeader = req.headers.authorization;
-            if (!authHeader || !authHeader.startsWith('Bearer ')) {
-                res.status(401).json({ error: 'Unauthorized - Missing token' });
-                return;
-            }
+}, async (request) => {
+    try {
+        const userId = request.auth?.uid;
 
-            const idToken = authHeader.split('Bearer ')[1];
-            let decodedToken;
+        if (!userId) {
+            throw new HttpsError('unauthenticated', 'Utente non autenticato');
+        }
 
-            // Rileva se siamo in ambiente emulator
-            const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
+        // Estrai i parametri della richiesta
+        const { message, conversationHistory = [], practiceContext = '' } = request.data;
 
-            try {
-                if (isEmulator) {
-                    // In emulatore, skippa la verifica del token e usa un mock
-                    console.log('⚠️ Running in emulator - skipping token verification');
-                    decodedToken = { uid: 'emulator-user' };
-                } else {
-                    // In produzione, verifica il token normalmente
-                    decodedToken = await admin.auth().verifyIdToken(idToken);
-                }
-            } catch (error) {
-                console.error('Error verifying token:', error);
-                res.status(401).json({ error: 'Unauthorized - Invalid token' });
-                return;
-            }
+        if (!message) {
+            throw new HttpsError('invalid-argument', 'Messaggio richiesto');
+        }
 
-            const userId = decodedToken.uid;
+        console.log(`📝 RAG Chat request from user ${userId}: ${message}`);
+        if (practiceContext) {
+            console.log(`📋 Practice context included: ${practiceContext.substring(0, 100)}...`);
+        }
 
-            // Estrai i parametri della richiesta
-            const { message, conversationHistory = [] } = req.body.data || req.body;
+        // MODALITÀ MOCK PER EMULATORE
+        const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
+        if (isEmulator) {
+            console.log('🧪 EMULATOR MODE: Returning mock response');
+            return {
+                answer: `[MODALITÀ EMULATORE]\n\nHo ricevuto la tua domanda: "${message}"\n\nPer testare la chat con l'AI RAG reale, esegui il deploy in produzione con:\nfirebase deploy --only functions\n\nL'emulatore non può accedere alle API Google Vertex AI.`,
+                sources: [
+                    {
+                        id: 'mock-source-1',
+                        title: 'Documento di test (Emulatore)',
+                        fileName: 'test.pdf',
+                        snippet: 'Questa è una risposta mock per l\'emulatore',
+                        downloadURL: null
+                    }
+                ]
+            };
+        }
 
-            if (!message) {
-                res.status(400).json({ error: 'Messaggio richiesto' });
-                return;
-            }
+        // Recupera configurazione AI da Firestore
+        const configRef = admin.firestore().collection('configurazioni').doc('ai');
+        const configSnap = await configRef.get();
 
-            console.log(`📝 RAG Chat request from user ${userId}: ${message}`);
-
-            // Recupera configurazione AI da Firestore
-            const configRef = admin.firestore().collection('configurazioni').doc('ai');
-            const configSnap = await configRef.get();
-
-            if (!configSnap.exists) {
-                res.status(412).json({ error: 'Configurazione AI non trovata' });
-                return;
-            }
+        if (!configSnap.exists) {
+            throw new HttpsError('failed-precondition', 'Configurazione AI non trovata');
+        }
 
         const aiConfig = configSnap.data();
 
@@ -86,13 +78,10 @@ Sei un assistente affidabile e preciso.`;
                 .join('\n') + '\n';
         }
 
-            // Verifica che il RAG Corpus ID sia configurato
-            if (!aiConfig.ragCorpusId) {
-                res.status(412).json({
-                    error: 'RAG Corpus ID non configurato. Vai in Profilo > Agenti AI e configura il RAG Corpus ID.'
-                });
-                return;
-            }
+        // Verifica che il RAG Corpus ID sia configurato
+        if (!aiConfig.ragCorpusId) {
+            throw new HttpsError('failed-precondition', 'RAG Corpus ID non configurato. Vai in Profilo > Agenti AI e configura il RAG Corpus ID.');
+        }
 
         // Configurazione Vertex AI
         const projectId = process.env.GCLOUD_PROJECT || 'legal-816fa';
@@ -133,9 +122,9 @@ Sei un assistente affidabile e preciso.`;
             }
         });
 
-        // Costruisci il prompt con il system prompt e la domanda
+        // Costruisci il prompt con il system prompt, il contesto della pratica e la domanda
         const fullPrompt = `${systemPrompt}
-
+${practiceContext}
 ${conversationContext}
 
 DOMANDA UTENTE: ${message}
@@ -262,32 +251,26 @@ RISPOSTA (ricorda di citare le fonti dai documenti):`;
             });
         }
 
-            console.log(`✅ RAG Chat response generated successfully with ${sources.length} sources`);
+        console.log(`✅ RAG Chat response generated successfully with ${sources.length} sources`);
 
-            res.status(200).json({
-                result: {
-                    answer: answer,
-                    sources: sources.slice(0, 5) // Aumentato a 5 fonti
-                }
-            });
+        return {
+            answer: answer,
+            sources: sources.slice(0, 5) // Aumentato a 5 fonti
+        };
 
-        } catch (error) {
-            console.error('❌ Errore in RAG Chat:', error);
+    } catch (error) {
+        console.error('❌ Errore in RAG Chat:', error);
 
-            let errorMessage = 'Errore durante l\'elaborazione della richiesta';
-            let statusCode = 500;
+        let errorMessage = 'Errore durante l\'elaborazione della richiesta';
 
-            if (error.message && error.message.includes('not found')) {
-                errorMessage = 'Modello AI non disponibile';
-                statusCode = 404;
-            } else if (error.message && error.message.includes('quota')) {
-                errorMessage = 'Quota API superata';
-                statusCode = 429;
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-
-            res.status(statusCode).json({ error: errorMessage });
+        if (error.message && error.message.includes('not found')) {
+            errorMessage = 'Modello AI non disponibile';
+        } else if (error.message && error.message.includes('quota')) {
+            errorMessage = 'Quota API superata';
+        } else if (error.message) {
+            errorMessage = error.message;
         }
-    });
+
+        throw new HttpsError('internal', errorMessage);
+    }
 });
