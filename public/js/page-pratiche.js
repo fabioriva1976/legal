@@ -49,10 +49,10 @@ async function loadChats() {
             throw new Error('Utente non autenticato');
         }
 
-        // Query per ottenere le chat dell'utente corrente
-        const chatsRef = collection(db, 'chats');
+        // Query per ottenere le pratiche dell'utente corrente
+        const praticheRef = collection(db, 'pratiche');
         const q = query(
-            chatsRef,
+            praticheRef,
             where('userId', '==', user.uid),
             orderBy('updatedAt', 'desc')
         );
@@ -199,8 +199,8 @@ async function handleCreateChat(e) {
             throw new Error('Utente non autenticato');
         }
 
-        // Crea il documento chat
-        const chatData = {
+        // Crea il documento pratica
+        const praticaData = {
             userId: user.uid,
             clientName: clientName,
             caseId: caseId,
@@ -209,7 +209,7 @@ async function handleCreateChat(e) {
             updatedAt: serverTimestamp()
         };
 
-        const docRef = await addDoc(collection(db, 'chats'), chatData);
+        const docRef = await addDoc(collection(db, 'pratiche'), praticaData);
         console.log('✅ Pratica creata con ID:', docRef.id);
 
         // Mostra messaggio di successo
@@ -253,7 +253,7 @@ async function deleteChat(chatId) {
         }
 
         // Elimina la pratica da Firestore
-        await deleteDoc(doc(db, 'chats', chatId));
+        await deleteDoc(doc(db, 'pratiche', chatId));
         console.log('✅ Pratica eliminata:', chatId);
 
         // Ricarica la lista

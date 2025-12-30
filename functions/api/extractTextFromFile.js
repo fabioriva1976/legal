@@ -23,20 +23,20 @@ exports.extractTextFromFileApi = onCall({ region: region }, async (request) => {
 
         console.log(`📄 Extracting text from attachment ${attachmentId} in chat ${chatId}`);
 
-        // Verifica accesso alla chat
-        const chatRef = admin.firestore().collection('chats').doc(chatId);
-        const chatDoc = await chatRef.get();
+        // Verifica accesso alla pratica
+        const praticaRef = admin.firestore().collection('pratiche').doc(chatId);
+        const praticaDoc = await praticaRef.get();
 
-        if (!chatDoc.exists) {
-            throw new HttpsError('not-found', 'Chat non trovata');
+        if (!praticaDoc.exists) {
+            throw new HttpsError('not-found', 'Pratica non trovata');
         }
 
-        if (chatDoc.data().userId !== userId) {
-            throw new HttpsError('permission-denied', 'Non hai accesso a questa chat');
+        if (praticaDoc.data().userId !== userId) {
+            throw new HttpsError('permission-denied', 'Non hai accesso a questa pratica');
         }
 
         // Recupera i metadati dell'allegato
-        const attachmentRef = chatRef.collection('attachments').doc(attachmentId);
+        const attachmentRef = praticaRef.collection('attachments').doc(attachmentId);
         const attachmentDoc = await attachmentRef.get();
 
         if (!attachmentDoc.exists) {

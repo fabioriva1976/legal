@@ -121,8 +121,8 @@ async function loadChatFromUrl() {
             throw new Error('Utente non autenticato');
         }
 
-        // Carica i dati della chat
-        const chatDocRef = doc(db, 'chats', chatId);
+        // Carica i dati della pratica
+        const chatDocRef = doc(db, 'pratiche', chatId);
         const chatDoc = await getDoc(chatDocRef);
 
         if (!chatDoc.exists()) {
@@ -164,7 +164,7 @@ async function loadChatFromUrl() {
 
 async function loadNotes(chatId) {
     try {
-        const chatDocRef = doc(db, 'chats', chatId);
+        const chatDocRef = doc(db, 'pratiche', chatId);
         const chatDoc = await getDoc(chatDocRef);
 
         if (chatDoc.exists()) {
@@ -189,7 +189,7 @@ async function saveNotes() {
         const notesTextarea = document.getElementById('notes-textarea');
         const notes = notesTextarea.value;
 
-        const chatDocRef = doc(db, 'chats', currentChatId);
+        const chatDocRef = doc(db, 'pratiche', currentChatId);
         await updateDoc(chatDocRef, {
             notes: notes,
             updatedAt: serverTimestamp()
@@ -215,7 +215,7 @@ async function saveNotes() {
 
 async function loadAttachments(chatId) {
     try {
-        const attachmentsRef = collection(db, 'chats', chatId, 'attachments');
+        const attachmentsRef = collection(db, 'pratiche', chatId, 'attachments');
         const q = query(attachmentsRef, orderBy('uploadedAt', 'desc'));
         const querySnapshot = await getDocs(q);
 
@@ -312,7 +312,7 @@ async function uploadAttachment(file) {
         console.log(`📤 Uploading file: ${file.name} (${formatFileSize(file.size)})`);
 
         // Upload file to Storage
-        const storageRef = ref(storage, `chats/${currentChatId}/attachments/${Date.now()}_${file.name}`);
+        const storageRef = ref(storage, `pratiche/${currentChatId}/attachments/${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
 
@@ -327,7 +327,7 @@ async function uploadAttachment(file) {
             uploadedBy: user.uid
         };
 
-        const docRef = await addDoc(collection(db, 'chats', currentChatId, 'attachments'), attachmentData);
+        const docRef = await addDoc(collection(db, 'pratiche', currentChatId, 'attachments'), attachmentData);
 
         console.log('✅ File caricato:', file.name);
 
@@ -399,7 +399,7 @@ window.deleteAttachment = async function(attachmentId) {
         await deleteObject(storageRef);
 
         // Delete from Firestore
-        await deleteDoc(doc(db, 'chats', currentChatId, 'attachments', attachmentId));
+        await deleteDoc(doc(db, 'pratiche', currentChatId, 'attachments', attachmentId));
 
         // Reload attachments
         await loadAttachments(currentChatId);
@@ -451,7 +451,7 @@ function updateChatHeader(title, subtitle) {
 
 async function loadChatHistory(chatId) {
     try {
-        const messagesRef = collection(db, 'chats', chatId, 'messages');
+        const messagesRef = collection(db, 'pratiche', chatId, 'messages');
         const q = query(messagesRef, orderBy('timestamp', 'asc'));
         const querySnapshot = await getDocs(q);
 
@@ -503,11 +503,11 @@ async function saveMessageToFirestore(role, content, sources = null) {
         }
 
         // Salva il messaggio nella sottocollezione
-        const messagesRef = collection(db, 'chats', currentChatId, 'messages');
+        const messagesRef = collection(db, 'pratiche', currentChatId, 'messages');
         await addDoc(messagesRef, messageData);
 
-        // Aggiorna il timestamp della chat principale
-        const chatDocRef = doc(db, 'chats', currentChatId);
+        // Aggiorna il timestamp della pratica principale
+        const chatDocRef = doc(db, 'pratiche', currentChatId);
         await updateDoc(chatDocRef, {
             updatedAt: serverTimestamp()
         });
