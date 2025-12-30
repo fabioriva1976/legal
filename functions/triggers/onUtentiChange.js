@@ -6,7 +6,12 @@ const { logAudit, AuditAction } = require("../utils/auditLogger");
 /**
  * Trigger che si attiva quando un documento nella collezione 'utenti' viene creato, modificato o eliminato
  */
-exports.onUtentiChange = onDocumentWritten("utenti/{userId}", async (event) => {
+exports.onUtentiChange = onDocumentWritten(
+    {
+        document: "utenti/{userId}",
+        region: "europe-west1"
+    },
+    async (event) => {
     const userId = event.params.userId;
     const beforeData = event.data?.before?.data();
     const afterData = event.data?.after?.data();

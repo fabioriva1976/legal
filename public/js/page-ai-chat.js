@@ -72,17 +72,53 @@ async function handleSendMessage(e) {
     const typingId = showTypingIndicator();
 
     try {
-        // Call the Cloud Function
-        const ragChatFunction = httpsCallable(functions, 'ragChatApi');
-        const response = await ragChatFunction({
-            message: message,
-            conversationHistory: conversationHistory
+        // Get auth token
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Utente non autenticato');
+        }
+        const token = await user.getIdToken();
+
+        // Call the Cloud Function via HTTP
+        const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:5001/legal-816fa/europe-west1/ragChatApi'
+            : 'https://europe-west1-legal-816fa.cloudfunctions.net/ragChatApi';
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                data: {
+                    message: message,
+                    conversationHistory: conversationHistory
+                }
+            })
         });
 
         // Remove typing indicator
         removeTypingIndicator(typingId);
 
-        const { answer, sources } = response.data;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Errore durante la richiesta');
+        }
+
+        const responseData = await response.json();
+        const { answer, sources } = responseData.result;
+
+        // Debug: log sources to verify downloadURL
+        console.log('📊 Sources received:', sources);
+        sources.forEach((source, idx) => {
+            console.log(`Source ${idx}:`, {
+                title: source.title,
+                fileName: source.fileName,
+                hasDownloadURL: !!source.downloadURL,
+                downloadURL: source.downloadURL
+            });
+        });
 
         // Add assistant response to chat
         addMessageToChat('assistant', answer, sources);
@@ -164,20 +200,32 @@ function addMessageToChat(role, text, sources = null) {
         sourcesDiv.appendChild(sourcesTitle);
 
         sources.forEach(source => {
+            console.log('🔗 Creating source item:', source.title, 'downloadURL:', source.downloadURL);
+
             const sourceItem = document.createElement('div');
             sourceItem.className = 'source-item';
 
-            const sourceTitle = document.createElement('div');
-            sourceTitle.className = 'source-item-title';
-            sourceTitle.textContent = source.title || source.fileName || 'Documento';
-            sourceItem.appendChild(sourceTitle);
-
-            if (source.snippet) {
-                const sourceSnippet = document.createElement('div');
-                sourceSnippet.style.color = 'var(--text-color-secondary)';
-                sourceSnippet.style.marginTop = '0.25rem';
-                sourceSnippet.textContent = source.snippet;
-                sourceItem.appendChild(sourceSnippet);
+            if (source.downloadURL) {
+                // Se c'è il link, crea un elemento cliccabile
+                const sourceLink = document.createElement('a');
+                sourceLink.href = source.downloadURL;
+                sourceLink.target = '_blank';
+                sourceLink.className = 'source-item-link';
+                sourceLink.innerHTML = `
+                    <span class="source-item-title">${source.title || source.fileName || 'Documento'}</span>
+                    <svg style="width: 14px; height: 14px; margin-left: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                `;
+                sourceItem.appendChild(sourceLink);
+            } else {
+                // Se non c'è il link, mostra solo il titolo
+                const sourceTitle = document.createElement('div');
+                sourceTitle.className = 'source-item-title';
+                sourceTitle.textContent = source.title || source.fileName || 'Documento';
+                sourceItem.appendChild(sourceTitle);
             }
 
             sourcesDiv.appendChild(sourceItem);

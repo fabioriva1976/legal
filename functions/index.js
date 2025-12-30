@@ -13,13 +13,12 @@ exports.timezone = "Europe/Rome";
 // ============================================================================
 // NOTA IMPORTANTE: MIGRAZIONE A FIRESTORE COMPLETATA
 // ============================================================================
-// Tutte le configurazioni (SMTP, WhatsApp, Calendar, AI) sono ora gestite
+// Tutte le configurazioni (SMTP, WhatsApp, AI) sono ora gestite
 // dinamicamente in Firestore nella collezione 'configurazioni'.
 //
 // Documenti disponibili:
 // - configurazioni/smtp: {host, port, user, password, from, fromName, secure}
 // - configurazioni/whatsapp: {phoneNumberId, accessToken, businessAccountId, webhookVerifyToken, apiVersion}
-// - configurazioni/calendar: {clientId, clientSecret, redirectUri, defaultCalendarId, timezone}
 // - configurazioni/ai: {provider, apiKey, model, temperature, maxTokens, timeout, systemPrompt, enableContext, enableSafety}
 //
 // VANTAGGI:
@@ -32,7 +31,6 @@ exports.timezone = "Europe/Rome";
 // --- ESPORTAZIONE DELLE FUNZIONI ---
 
 // === FUNZIONI API - PAGINE ===
-exports.aiAssistantApi = require("./api/page-aiAssistant").aiAssistantApi;
 exports.ragChatApi = require("./api/page-ragChat").ragChatApi;
 
 // === FUNZIONI API - TEST CONFIGURAZIONI ===
@@ -55,7 +53,6 @@ exports.createAuditLogApi = auditLogs.createAuditLogApi;
 
 // Triggers Firestore
 exports.onUtentiChange = require("./triggers/onUtentiChange").onUtentiChange;
-exports.onEntita3Change = require("./triggers/onEntita3Change").onEntita3Change;
 
 // Triggers Anagrafica (utenti gestiti in onUtentiChange.js)
 const anagraficaTriggers = require("./triggers/onAnagraficaChange");

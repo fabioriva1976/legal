@@ -226,15 +226,32 @@
 }
 
 .source-item {
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     background: var(--container-bg);
     border-radius: 6px;
     margin-bottom: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+}
+
+.source-item-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+    font-weight: 500;
+}
+
+.source-item-link:hover {
+    opacity: 0.8;
+}
+
+.source-item-link .source-item-title {
+    flex: 1;
 }
 
 .source-item-title {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-primary);
 }
 

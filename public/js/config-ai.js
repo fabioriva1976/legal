@@ -35,6 +35,8 @@ async function loadCurrentConfig() {
             document.getElementById('ai-max-tokens').value = data.maxTokens || 2048;
             document.getElementById('ai-timeout').value = data.timeout || 30;
             document.getElementById('ai-system-prompt').value = data.systemPrompt || 'Sei un assistente virtuale intelligente che aiuta gli utenti con le loro richieste in modo professionale e cortese.';
+            document.getElementById('ai-rag-corpus-id').value = data.ragCorpusId || '';
+            document.getElementById('ai-rag-location').value = data.ragLocation || 'europe-west1';
             document.getElementById('ai-enable-context').checked = data.enableContext !== undefined ? data.enableContext : true;
             document.getElementById('ai-enable-safety').checked = data.enableSafety !== undefined ? data.enableSafety : true;
 
@@ -63,6 +65,13 @@ async function handleSubmit(e) {
         }
 
         const formData = new FormData(e.target);
+
+        // Debug: stampa tutti i valori del form
+        console.log('📋 FormData values:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
         const configData = {
             provider: formData.get('provider'),
             apiKey: formData.get('apiKey'),
@@ -71,12 +80,16 @@ async function handleSubmit(e) {
             maxTokens: parseInt(formData.get('maxTokens')),
             timeout: parseInt(formData.get('timeout')),
             systemPrompt: formData.get('systemPrompt'),
+            ragCorpusId: formData.get('ragCorpusId') || '',
+            ragLocation: formData.get('ragLocation') || 'europe-west1',
             enableContext: document.getElementById('ai-enable-context').checked,
             enableSafety: document.getElementById('ai-enable-safety').checked,
             updatedAt: serverTimestamp(),
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email
         };
+
+        console.log('💾 Saving config data:', configData);
 
         await setDoc(doc(db, 'configurazioni', 'ai'), configData, { merge: true });
 

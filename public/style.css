@@ -56,6 +56,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .sidebar-header { display: flex; align-items: center; justify-content: center; height: var(--header-height); flex-shrink: 0; }
 .logo { font-size: 1.5rem; font-weight: 700; color: #fff; white-space: nowrap; }
 .nav-menu { list-style: none; padding: 1rem 0.75rem; }
+.nav-section-title { padding: 0.5rem 1.75rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-color-secondary); opacity: 0.7; margin-top: 1rem; letter-spacing: 0.5px; }
+.app-wrapper.sidebar-collapsed .nav-section-title { opacity: 0; visibility: hidden; height: 0; padding: 0; margin: 0; }
 .nav-bottom { margin-top: auto; }
 .nav-menu a { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: var(--border-radius); margin-bottom: 0.25rem; transition: var(--transition-fast), transform 0.15s var(--transition-easing); white-space: nowrap; transform: translateZ(0); }
 .nav-menu a:hover { background-color: var(--sidebar-hover-bg); color: #fff; transform: translateX(4px); }

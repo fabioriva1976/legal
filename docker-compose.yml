@@ -12,7 +12,7 @@ services:
 
   firebase-cli:
     image: node:22
-    container_name: "firebase_cli"
+    container_name: "firebase_legal"
     working_dir: /app
     ports:
       - "4000:4000"

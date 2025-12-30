@@ -1,6 +1,7 @@
 const { onRequest } = require("firebase-functions/v2/https");
-const { VertexAI } = require('@google-cloud/vertexai');
+const { VertexAI } = require("@google-cloud/vertexai");
 const admin = require("firebase-admin");
+const cors = require("cors")({ origin: true });
 
 const { region } = require("../index");
 
@@ -8,43 +9,114 @@ const { region } = require("../index");
  * Cloud Function che integra Vertex AI RAG per rispondere a domande
  * utilizzando i documenti caricati come contesto
  */
-exports.ragChatApi = onRequest({ region: region, cors: true }, async (req, res) => {
-    // Verifica autenticazione
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Non autorizzato' });
-    }
+exports.ragChatApi = onRequest({
+    region: region
+}, async (req, res) => {
+    // Gestisci CORS
+    return cors(req, res, async () => {
+        try {
+            // Verifica autenticazione tramite Firebase ID token
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                res.status(401).json({ error: 'Unauthorized - Missing token' });
+                return;
+            }
 
-    const idToken = authHeader.split('Bearer ')[1];
+            const idToken = authHeader.split('Bearer ')[1];
+            let decodedToken;
 
-    try {
-        // Verifica il token Firebase
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userId = decodedToken.uid;
+            // Rileva se siamo in ambiente emulator
+            const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
 
-        // Estrai i parametri della richiesta
-        const { message, conversationHistory = [] } = req.body;
+            try {
+                if (isEmulator) {
+                    // In emulatore, skippa la verifica del token e usa un mock
+                    console.log('⚠️ Running in emulator - skipping token verification');
+                    decodedToken = { uid: 'emulator-user' };
+                } else {
+                    // In produzione, verifica il token normalmente
+                    decodedToken = await admin.auth().verifyIdToken(idToken);
+                }
+            } catch (error) {
+                console.error('Error verifying token:', error);
+                res.status(401).json({ error: 'Unauthorized - Invalid token' });
+                return;
+            }
 
-        if (!message) {
-            return res.status(400).json({ error: 'Messaggio richiesto' });
-        }
+            const userId = decodedToken.uid;
 
-        console.log(`📝 RAG Chat request from user ${userId}: ${message}`);
+            // Estrai i parametri della richiesta
+            const { message, conversationHistory = [] } = req.body.data || req.body;
 
-        // Recupera configurazione AI da Firestore
-        const configRef = admin.firestore().collection('configurazioni').doc('ai');
-        const configSnap = await configRef.get();
+            if (!message) {
+                res.status(400).json({ error: 'Messaggio richiesto' });
+                return;
+            }
 
-        if (!configSnap.exists) {
-            return res.status(500).json({ error: 'Configurazione AI non trovata' });
-        }
+            console.log(`📝 RAG Chat request from user ${userId}: ${message}`);
+
+            // Recupera configurazione AI da Firestore
+            const configRef = admin.firestore().collection('configurazioni').doc('ai');
+            const configSnap = await configRef.get();
+
+            if (!configSnap.exists) {
+                res.status(412).json({ error: 'Configurazione AI non trovata' });
+                return;
+            }
 
         const aiConfig = configSnap.data();
 
-        // TODO: Sostituisci questi valori con la tua configurazione Vertex AI RAG
-        const projectId = 'legal-816fa'; // Il tuo project ID
-        const location = 'europe-west1'; // La tua region
-        const ragCorpusName = 'projects/' + projectId + '/locations/' + location + '/ragCorpora/YOUR_CORPUS_ID';
+        // System prompt per RAG - usa quello configurato o un default rigoroso
+        const systemPrompt = aiConfig.systemPrompt || `Sei un assistente AI che risponde ESCLUSIVAMENTE basandosi sui documenti forniti.
+
+REGOLE FONDAMENTALI:
+1. Rispondi SOLO se la risposta è contenuta nei documenti forniti
+2. Se l'informazione NON è nei documenti, rispondi chiaramente: "Non ho trovato questa informazione nei documenti disponibili."
+3. Cita SEMPRE le fonti specifiche (nome documento) quando rispondi
+4. NON inventare, NON dedurre, NON usare conoscenze esterne
+5. Se i documenti forniscono informazioni parziali, specifica cosa è presente e cosa manca
+
+Sei un assistente affidabile e preciso.`;
+
+        // Prepara il contesto della conversazione
+        let conversationContext = '';
+        if (conversationHistory.length > 0) {
+            conversationContext = '\n\nSTORICO CONVERSAZIONE:\n' + conversationHistory
+                .map(msg => `${msg.role === 'user' ? 'Utente' : 'Assistente'}: ${msg.content}`)
+                .join('\n') + '\n';
+        }
+
+            // Verifica che il RAG Corpus ID sia configurato
+            if (!aiConfig.ragCorpusId) {
+                res.status(412).json({
+                    error: 'RAG Corpus ID non configurato. Vai in Profilo > Agenti AI e configura il RAG Corpus ID.'
+                });
+                return;
+            }
+
+        // Configurazione Vertex AI
+        const projectId = process.env.GCLOUD_PROJECT || 'legal-816fa';
+        const location = aiConfig.ragLocation || 'europe-west1';
+        const ragCorpus = `projects/${projectId}/locations/${location}/ragCorpora/${aiConfig.ragCorpusId}`;
+
+        console.log(`🔍 Using RAG Corpus: ${ragCorpus}`);
+
+        // Normalizza il nome del modello
+        let modelName = aiConfig.model || 'gemini-1.5-flash';
+        if (modelName.startsWith('models/')) {
+            modelName = modelName.replace('models/', '');
+        }
+
+        // Per Vertex AI, usa i nomi diretti (senza -latest)
+        const modelMapping = {
+            'gemini-1.5-pro': 'gemini-1.5-pro',
+            'gemini-1.5-flash': 'gemini-1.5-flash',
+            'gemini-2.5-pro': 'gemini-2.5-pro',
+            'gemini-2.5-flash': 'gemini-2.5-flash',
+            'gemini-pro': 'gemini-1.0-pro',
+        };
+
+        const finalModel = modelMapping[modelName] || modelName;
 
         // Inizializza Vertex AI
         const vertexAI = new VertexAI({
@@ -52,89 +124,170 @@ exports.ragChatApi = onRequest({ region: region, cors: true }, async (req, res) 
             location: location
         });
 
-        // Prepara il contesto della conversazione
-        let conversationContext = '';
-        if (conversationHistory.length > 0) {
-            conversationContext = conversationHistory
-                .map(msg => `${msg.role === 'user' ? 'Utente' : 'Assistente'}: ${msg.content}`)
-                .join('\n');
-            conversationContext += '\n\n';
-        }
-
-        // Crea il prompt per RAG
-        const prompt = `${conversationContext}Utente: ${message}
-
-Rispondi alla domanda dell'utente basandoti SOLO sulle informazioni contenute nei documenti forniti.
-Se le informazioni non sono disponibili nei documenti, dillo chiaramente.
-Cita sempre le fonti specifiche da cui prendi le informazioni.`;
-
-        // Per ora, useremo un approccio semplificato senza RAG corpus
-        // In produzione, dovresti configurare Vertex AI RAG Engine
-
-        // Usa il modello Gemini direttamente per ora
-        const model = aiConfig.model || 'gemini-1.5-flash';
-        const generativeModel = vertexAI.getGenerativeModel({
-            model: model
+        // Crea il modello con RAG
+        const generativeModel = vertexAI.preview.getGenerativeModel({
+            model: finalModel,
+            generationConfig: {
+                temperature: aiConfig.temperature || 0.7,
+                maxOutputTokens: aiConfig.maxTokens || 2048,
+            }
         });
 
-        // Query dei documenti rilevanti da Firestore
-        const documentsRef = admin.firestore().collection('documenti');
-        const documentsSnapshot = await documentsRef
-            .where('stato', '==', true)
-            .limit(10)
-            .get();
+        // Costruisci il prompt con il system prompt e la domanda
+        const fullPrompt = `${systemPrompt}
 
-        let documentsContext = '\n\n=== DOCUMENTI DISPONIBILI ===\n\n';
-        const sources = [];
+${conversationContext}
 
-        documentsSnapshot.forEach(doc => {
-            const data = doc.data();
-            documentsContext += `Documento: ${data.titolo}\n`;
-            documentsContext += `Tipologia: ${data.tipologia}\n`;
-            if (data.descrizione) {
-                documentsContext += `Descrizione: ${data.descrizione}\n`;
-            }
-            if (data.tags && data.tags.length > 0) {
-                documentsContext += `Tag: ${data.tags.join(', ')}\n`;
-            }
-            documentsContext += '\n---\n\n';
+DOMANDA UTENTE: ${message}
 
-            sources.push({
-                id: doc.id,
-                title: data.titolo,
-                tipologia: data.tipologia,
-                fileName: data.fileName,
-                snippet: data.descrizione ? data.descrizione.substring(0, 200) : null
-            });
-        });
+RISPOSTA (ricorda di citare le fonti dai documenti):`;
 
-        const fullPrompt = documentsContext + '\n\n' + prompt;
+        console.log(`🤖 Sending query to Vertex AI RAG...`);
 
-        // Genera la risposta
-        const result = await generativeModel.generateContent(fullPrompt);
+        // Genera la risposta usando RAG
+        const ragRequest = {
+            contents: [{
+                role: 'user',
+                parts: [{ text: fullPrompt }]
+            }],
+            tools: [{
+                retrieval: {
+                    vertexRagStore: {
+                        ragResources: [{
+                            ragCorpus: ragCorpus
+                        }]
+                    }
+                }
+            }]
+        };
+
+        const result = await generativeModel.generateContent(ragRequest);
         const response = result.response;
-        const answer = response.text();
+        const answer = response.candidates[0].content.parts[0].text;
 
-        console.log(`✅ RAG Chat response generated successfully`);
+        console.log('📊 Grounding metadata:', JSON.stringify(response.candidates[0].groundingMetadata, null, 2));
 
-        return res.status(200).json({
-            answer: answer,
-            sources: sources.slice(0, 3) // Limita a 3 fonti per la risposta
-        });
+        // Estrai le fonti dalle grounding metadata
+        const sources = [];
+        const groundingMetadata = response.candidates[0].groundingMetadata;
 
-    } catch (error) {
-        console.error('❌ Errore in RAG Chat:', error);
+        if (groundingMetadata) {
+            // Prova groundingChunks (struttura più comune)
+            if (groundingMetadata.groundingChunks && groundingMetadata.groundingChunks.length > 0) {
+                console.log(`📚 Found ${groundingMetadata.groundingChunks.length} grounding chunks`);
 
-        let errorMessage = 'Errore durante l\'elaborazione della richiesta';
-        if (error.message.includes('not found')) {
-            errorMessage = 'Modello AI non disponibile';
-        } else if (error.message.includes('quota')) {
-            errorMessage = 'Quota API superata';
+                // Mappa per evitare duplicati (stesso file)
+                const seenFiles = new Set();
+
+                for (const chunk of groundingMetadata.groundingChunks) {
+                    const retrievedContext = chunk.retrievedContext;
+
+                    if (retrievedContext) {
+                        // Estrai il nome del file dal percorso URI o title
+                        const uri = retrievedContext.uri || '';
+                        const title = retrievedContext.title || '';
+                        const fileName = title || uri.split('/').pop() || `Documento ${sources.length + 1}`;
+
+                        // Evita duplicati dello stesso file
+                        if (seenFiles.has(fileName)) {
+                            continue;
+                        }
+                        seenFiles.add(fileName);
+
+                        // Cerca il documento in Firestore per ottenere ID, titolo e URL
+                        let docId = null;
+                        let docTitle = fileName;
+                        let downloadURL = null;
+
+                        try {
+                            const docsSnapshot = await admin.firestore().collection('documenti')
+                                .where('fileName', '==', fileName)
+                                .limit(1)
+                                .get();
+
+                            if (!docsSnapshot.empty) {
+                                const docData = docsSnapshot.docs[0];
+                                docId = docData.id;
+                                const data = docData.data();
+                                docTitle = data.titolo || fileName;
+                                downloadURL = data.downloadURL || null;
+                            }
+                        } catch (err) {
+                            console.warn('⚠️ Could not find document in Firestore:', fileName, err);
+                        }
+
+                        // Estrai snippet dal testo del chunk
+                        const text = retrievedContext.text || retrievedContext.ragChunk?.text || '';
+                        const snippet = text.substring(0, 300);
+
+                        sources.push({
+                            id: docId || `source-${sources.length}`,
+                            title: docTitle,
+                            fileName: fileName,
+                            snippet: snippet,
+                            downloadURL: downloadURL,
+                            uri: uri
+                        });
+                    }
+                }
+            }
+            // Fallback: usa retrievalMetadata se disponibile
+            else if (groundingMetadata.retrievalMetadata) {
+                console.log('📚 Using retrievalMetadata');
+                const sources_list = groundingMetadata.retrievalMetadata.sources || [];
+
+                for (const source of sources_list) {
+                    const fileName = source.title || source.uri?.split('/').pop() || `Documento ${sources.length + 1}`;
+
+                    sources.push({
+                        id: `source-${sources.length}`,
+                        title: fileName,
+                        fileName: fileName,
+                        snippet: source.snippet || null,
+                        downloadURL: null
+                    });
+                }
+            }
         }
 
-        return res.status(500).json({
-            error: errorMessage,
-            details: error.message
-        });
-    }
+        // Se non ci sono fonti specifiche, prova a estrarre dal contenuto
+        if (sources.length === 0) {
+            console.warn('⚠️ No grounding metadata found, creating generic source');
+            sources.push({
+                id: 'source-generic',
+                title: 'Documenti del corpus RAG',
+                fileName: null,
+                snippet: 'Risposta generata da documenti indicizzati nel RAG',
+                downloadURL: null
+            });
+        }
+
+            console.log(`✅ RAG Chat response generated successfully with ${sources.length} sources`);
+
+            res.status(200).json({
+                result: {
+                    answer: answer,
+                    sources: sources.slice(0, 5) // Aumentato a 5 fonti
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ Errore in RAG Chat:', error);
+
+            let errorMessage = 'Errore durante l\'elaborazione della richiesta';
+            let statusCode = 500;
+
+            if (error.message && error.message.includes('not found')) {
+                errorMessage = 'Modello AI non disponibile';
+                statusCode = 404;
+            } else if (error.message && error.message.includes('quota')) {
+                errorMessage = 'Quota API superata';
+                statusCode = 429;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            res.status(statusCode).json({ error: errorMessage });
+        }
+    });
 });

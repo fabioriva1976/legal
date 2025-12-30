@@ -4,7 +4,6 @@ import { db, auth } from './firebase-config.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 //pagine standard
-import { initPageAiAssistantPage } from './page-ai-assistant.js';
 import { initPageDocumentiPage } from './page-documenti.js';
 import { initPageAiChatPage } from './page-ai-chat.js';
 //anagrafica
@@ -15,7 +14,6 @@ import { initConfigSmtpPage } from './config-smtp.js';
 import { initConfigAiPage } from './config-ai.js';
 //profile
 import { initProfilePage } from './profile.js';
-import { initProfileSettingsPage } from './profile-settings.js';
 
 const CACHE_KEY = 'datiUtenteProfilo';
 
@@ -23,7 +21,6 @@ const CACHE_KEY = 'datiUtenteProfilo';
 
 // Mappa funzioni init per page
 const pageInitializers = {
-    'page-ai-assistant': initPageAiAssistantPage,
     'page-documenti': initPageDocumentiPage,
     'page-ai-chat': initPageAiChatPage,
     //anagrafica
@@ -34,7 +31,6 @@ const pageInitializers = {
     'config-ai': initConfigAiPage,
     //profile
     'profile': initProfilePage,
-    'profile-settings': initProfileSettingsPage,
 };
 
 
@@ -157,10 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let sidebarArea = 'page'; // default: page
 
         // Determina l'area in base al PREFISSO del nome della pagina
-        // profile-settings va in config, le altre pagine config-* in config, profile* in profile
-        if (pageName === 'profile-settings') {
-            sidebarArea = 'config';
-        } else if (pageName.startsWith('config-')) {
+        if (pageName.startsWith('config-')) {
             sidebarArea = 'config';
         } else if (pageName.startsWith('profile')) {
             sidebarArea = 'profile';

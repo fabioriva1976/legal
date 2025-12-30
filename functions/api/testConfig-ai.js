@@ -89,36 +89,72 @@ exports.testAiApi = onCall({ region }, async (request) => {
 async function testGoogleAI(aiConfig) {
     console.log(`🤖 Testing Google AI: ${aiConfig.model}`);
 
-    // Inizializza Google Generative AI
-    const genAI = new GoogleGenerativeAI(aiConfig.apiKey);
-    const model = genAI.getGenerativeModel({
-        model: aiConfig.model,
-        generationConfig: {
-            temperature: aiConfig.temperature || 0.7,
-            maxOutputTokens: 100, // Limita per il test
-        }
-    });
+    // Normalizza il nome del modello (rimuovi prefisso "models/" se presente)
+    let modelName = aiConfig.model;
+    if (modelName.startsWith('models/')) {
+        modelName = modelName.replace('models/', '');
+        console.log(`ℹ️  Nome modello normalizzato da "${aiConfig.model}" a "${modelName}"`);
+    }
 
-    console.log("🔄 Invio prompt di test...");
-
-    // Invia un prompt di test semplice
-    const testPrompt = "Rispondi solo con 'OK' se funziono correttamente.";
-    const result = await model.generateContent(testPrompt);
-    const response = await result.response;
-    const text = response.text();
-
-    console.log("✅ Risposta Google AI ricevuta:", text.substring(0, 100));
-
-    return {
-        success: true,
-        message: "✅ Test Google AI completato con successo!",
-        details: {
-            provider: aiConfig.provider,
-            model: aiConfig.model,
-            responsePreview: text.substring(0, 100),
-            responseLength: text.length
-        }
+    // Mappa dei modelli Gemini supportati con l'SDK @google/generative-ai
+    // Nota: i modelli 2.5 usano il nome diretto, i modelli 1.5 richiedono il suffisso -latest
+    const modelMapping = {
+        'gemini-2.5-pro': 'gemini-2.5-pro',
+        'gemini-2.5-flash': 'gemini-2.5-flash',
+        'gemini-1.5-pro': 'gemini-1.5-pro-latest',
+        'gemini-1.5-flash': 'gemini-1.5-flash-latest',
+        'gemini-pro': 'gemini-pro',
+        'gemini-pro-vision': 'gemini-pro-vision'
     };
+
+    // Usa il mapping se disponibile
+    const finalModel = modelMapping[modelName] || modelName;
+    if (finalModel !== modelName) {
+        console.log(`ℹ️  Modello mappato da "${modelName}" a "${finalModel}"`);
+    }
+
+    try {
+        // Inizializza Google Generative AI
+        const genAI = new GoogleGenerativeAI(aiConfig.apiKey);
+        const model = genAI.getGenerativeModel({
+            model: finalModel,
+            generationConfig: {
+                temperature: aiConfig.temperature || 0.7,
+                maxOutputTokens: 100, // Limita per il test
+            }
+        });
+
+        console.log("🔄 Invio prompt di test...");
+
+        // Invia un prompt di test semplice
+        const testPrompt = "Rispondi solo con 'OK' se funziono correttamente.";
+        const result = await model.generateContent(testPrompt);
+        const response = await result.response;
+        const text = response.text();
+
+        console.log("✅ Risposta Google AI ricevuta:", text.substring(0, 100));
+
+        return {
+            success: true,
+            message: "✅ Test Google AI completato con successo!",
+            details: {
+                provider: aiConfig.provider,
+                model: aiConfig.model,
+                modelUsed: finalModel,
+                responsePreview: text.substring(0, 100),
+                responseLength: text.length
+            }
+        };
+    } catch (error) {
+        // Gestisci errori specifici di Google AI
+        if (error.message && error.message.includes('not found')) {
+            throw new Error(`❌ Modello "${modelName}" non trovato. Modelli supportati: gemini-2.5-pro, gemini-2.5-flash, gemini-1.5-pro, gemini-1.5-flash, gemini-pro. Verifica anche la tua API key.`);
+        } else if (error.message && error.message.includes('API key')) {
+            throw new Error("❌ API Key Google non valida. Verifica la chiave API.");
+        } else {
+            throw error;
+        }
+    }
 }
 
 // Funzione di test per OpenAI

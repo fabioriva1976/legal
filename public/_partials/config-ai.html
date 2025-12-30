@@ -33,12 +33,20 @@
                     <div class="form-group">
                         <label for="ai-model">Modello *</label>
                         <select id="ai-model" name="model" class="form-control" required>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                            <option value="gpt-4">GPT-4</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="claude-3-opus">Claude 3 Opus</option>
-                            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                            <optgroup label="Google AI - Gemini">
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Consigliato)</option>
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Beta)</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Beta)</option>
+                            </optgroup>
+                            <optgroup label="OpenAI">
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </optgroup>
+                            <optgroup label="Anthropic">
+                                <option value="claude-3-opus">Claude 3 Opus</option>
+                                <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                            </optgroup>
                         </select>
                         <small class="help-text">Modello AI da utilizzare</small>
                     </div>
@@ -66,6 +74,19 @@
                     <label for="ai-system-prompt">System Prompt</label>
                     <textarea id="ai-system-prompt" name="systemPrompt" class="form-control" rows="4" placeholder="Sei un assistente virtuale...">Sei un assistente virtuale intelligente che aiuta gli utenti con le loro richieste in modo professionale e cortese.</textarea>
                     <small class="help-text">Istruzioni di sistema per l'AI</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ai-rag-corpus-id">RAG Corpus ID</label>
+                        <input type="text" id="ai-rag-corpus-id" name="ragCorpusId" class="form-control" placeholder="1234567890">
+                        <small class="help-text">ID del corpus Vertex AI RAG (solo numerico)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-rag-location">RAG Location</label>
+                        <input type="text" id="ai-rag-location" name="ragLocation" class="form-control" placeholder="europe-west1" value="europe-west1">
+                        <small class="help-text">Regione del RAG corpus</small>
+                    </div>
                 </div>
 
                 <div class="form-group">

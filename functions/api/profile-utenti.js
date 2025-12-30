@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { region } = require("../index");
 
@@ -12,9 +12,10 @@ const auth = admin.auth();
 
 /**
  * Ottiene la lista di tutti gli utenti.
- * @type {functions.HttpsFunction}
  */
-const userListApi = functions.https.onCall({ region: region }, async (data, context) => {
+const userListApi = onCall({ region: region }, async (request) => {
+    const data = request.data;
+    const context = request;
     // Aggiungi qui controlli di sicurezza, es. se l'utente chiamante è un admin.
     // if (!context.auth) {
     //   throw new functions.https.HttpsError('unauthenticated', 'Devi essere autenticato.');
@@ -31,15 +32,14 @@ const userListApi = functions.https.onCall({ region: region }, async (data, cont
         return { users };
     } catch (error) {
         console.error("Errore nel listare gli utenti:", error);
-        throw new functions.https.HttpsError('internal', 'Impossibile recuperare gli utenti.');
+        throw new HttpsError('internal', 'Impossibile recuperare gli utenti.');
     }
 });
 
 /**
  * Crea un nuovo utente.
- * @type {functions.HttpsFunction}
  */
-const userCreateApi = functions.https.onCall({ region: region }, async (request) => {
+const userCreateApi = onCall({ region: region }, async (request) => {
     try {
         const data = request.data;
         const context = request;
@@ -59,15 +59,14 @@ const userCreateApi = functions.https.onCall({ region: region }, async (request)
         return { uid: userRecord.uid, message: "Utente creato con successo!" };
     } catch (error) {
         console.error("Errore nella creazione utente:", error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
 /**
  * Aggiorna un utente esistente.
- * @type {functions.HttpsFunction}
  */
-const userUpdateApi = functions.https.onCall({ region: region }, async (request) => {
+const userUpdateApi = onCall({ region: region }, async (request) => {
     const data = request.data;
     const context = request;
     const { uid, ...updateData } = data;
@@ -81,22 +80,21 @@ const userUpdateApi = functions.https.onCall({ region: region }, async (request)
         return { message: "Utente aggiornato con successo!" };
     } catch (error) {
         console.error("Errore nell'aggiornamento utente:", error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
 /**
  * Elimina un utente.
- * @type {functions.HttpsFunction}
  */
-const userDeleteApi = functions.https.onCall({ region: region }, async (request) => {
+const userDeleteApi = onCall({ region: region }, async (request) => {
     const data = request.data;
     const context = request;
     try {
         console.log("Richiesta eliminazione utente:", data);
 
         if (!data.uid || typeof data.uid !== 'string' || data.uid.trim() === '') {
-            throw new functions.https.HttpsError('invalid-argument', 'The uid must be a non-empty string with at most 128 characters.');
+            throw new HttpsError('invalid-argument', 'The uid must be a non-empty string with at most 128 characters.');
         }
 
         let oldData = null;
@@ -139,7 +137,7 @@ const userDeleteApi = functions.https.onCall({ region: region }, async (request)
         };
     } catch (error) {
         console.error("Errore nell'eliminazione utente:", error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
