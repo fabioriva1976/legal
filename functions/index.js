@@ -75,3 +75,6 @@ exports.onAnagraficaClientiDelete = anagraficaTriggers.onAnagraficaClientiDelete
 exports.onDocumentiCreate = anagraficaTriggers.onDocumentiCreate;
 exports.onDocumentiUpdate = anagraficaTriggers.onDocumentiUpdate;
 exports.onDocumentiDelete = anagraficaTriggers.onDocumentiDelete;
+
+// === FUNZIONI CRON ===
+exports.scaricaLeggiNormattiva = require("./cron/scaricaLeggiNormattiva").scaricaLeggiNormattiva;
